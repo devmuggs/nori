@@ -20,7 +20,8 @@ const envLoader = (
 };
 
 export let environment = {
-	NoriYamlPath: envLoader("NORI_YAML_PATH", { defaultValue: "" })
+	NoriYamlPath: envLoader("NORI_YAML_PATH", { defaultValue: "" }),
+	PreferredLocale: envLoader("NORI_PREFERRED_LOCALE", { defaultValue: "en" })
 };
 
 export const loadEnvironment = (pathToEnvFile: string) => {
@@ -28,6 +29,7 @@ export const loadEnvironment = (pathToEnvFile: string) => {
 	dotenv.config({ path: resolvedPath });
 
 	environment = {
-		NoriYamlPath: envLoader("NORI_YAML_PATH", { defaultValue: "" })
+		NoriYamlPath: envLoader("NORI_YAML_PATH", { defaultValue: "" }),
+		PreferredLocale: envLoader("NORI_PREFERRED_LOCALE", { defaultValue: "en" })
 	};
 };
