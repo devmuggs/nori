@@ -1,0 +1,27 @@
+# Nori Configuration File
+preferredLocale: ja-JP
+author: torippi
+projectName: cli
+projectDescription: A Nori project
+version: 1.0.0
+
+# Add your collections and entries below
+collections:
+    welcome-to-nori:
+        params:
+            username
+                type: string
+                description: "The name of the user."
+        locales:
+            en-GB: "Welcome to Nori, {{username}}!"
+            ja-JP: "ノリへようこそ、{{username}}さん！"
+
+entries:
+    lets-get-started:
+        params:
+            topic:
+                type: string
+                description: "The topic to get started with."
+        locales:
+            en-GB: "Let's get started with {{topic}}."
+            ja-JP: "さあ、{{topic}}を始めましょう！"

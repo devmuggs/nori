@@ -2,8 +2,8 @@ import { Enum, type EnumValue } from "../utils/enum.js";
 
 export type NoriLocale = EnumValue<typeof NoriLocale>;
 export const [NoriLocale, NoriLocaleMeta] = Enum({
-	EnglishBritish: "enGB",
-	Japanese: "ja"
+	EnglishBritish: "en-GB",
+	Japanese: "ja-JP"
 });
 
 export type NoriLocaleConfigurationType = {

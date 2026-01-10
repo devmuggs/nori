@@ -67,7 +67,9 @@ export class NoriCollection {
 export class NoriManager {
 	public static collections: Map<string, NoriCollection> = new Map();
 
-	public static async loadFromYaml(filePath: string = environment.NoriYamlPath): Promise<void> {
+	public static async loadFromYaml(
+		filePath: string | undefined = environment.NoriYamlPath
+	): Promise<void> {
 		if (!filePath) {
 			throw new Error("No YAML file path provided. Set NORI_YAML_PATH environment variable.");
 		}

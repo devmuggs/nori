@@ -8,10 +8,31 @@ import {
 	NoriLocaleMeta
 } from "../state-loader/state-loader-types.js";
 
-import { input, select, Separator } from "@inquirer/prompts";
+import { checkbox, input, select, Separator } from "@inquirer/prompts";
 
 /** Initialiser is responsible for setting up the initial configuration and environment for the CLI tool. (i.e. nori --init ) */
 export class Initialiser {
+	private static async promptLocale(): Promise<NoriLocale> {
+		const locale = await select({
+			message: {
+				[NoriLocale.EnglishBritish]: "Preferred locale:",
+				[NoriLocale.Japanese]: "希望のロケール:"
+			}[(environment.PreferredLocale as NoriLocale) || NoriLocale.EnglishBritish],
+			choices: NoriLocaleMeta.values.map((locale) => ({
+				name: `${NoriLocaleConfiguration[locale].displayName} (${NoriLocaleConfiguration[locale].description})`,
+				value: locale
+			})),
+			default: NoriLocale.EnglishBritish
+		});
+
+		if (NoriLocaleMeta.evaluateIsValue(locale)) {
+			environment.PreferredLocale = locale;
+			return locale as NoriLocale;
+		}
+
+		throw new Error("Invalid locale selected.");
+	}
+
 	private static async prompt(options: {
 		message: Record<NoriLocale, string>;
 		default?: string;
@@ -19,6 +40,10 @@ export class Initialiser {
 		validate?: (value: string) => boolean | string;
 		onSubmit?: (value: string) => void;
 	}): Promise<string> {
+		if (environment.PreferredLocale === undefined) {
+			await this.promptLocale();
+		}
+
 		const { message, default: defaultValue, validate, choices } = options;
 		const localizedMessage =
 			message[environment.PreferredLocale as NoriLocale] ||
@@ -53,29 +78,35 @@ export class Initialiser {
 		const cwd = process.cwd();
 		const norifilePath = path.join(cwd, "nori.yaml");
 
+		if (environment.PreferredLocale === undefined) {
+			await this.promptLocale();
+		}
+
 		if (fs.existsSync(norifilePath)) {
-			logger.error("A nori.yaml file already exists in this directory.");
-			return;
+			logger.warn("A nori.yaml file already exists in this directory.");
+
+			const overwrite = await select({
+				message: {
+					[NoriLocale.EnglishBritish]:
+						"A nori.yaml file already exists in this directory. Do you want to overwrite it?",
+					[NoriLocale.Japanese]:
+						"このディレクトリには既にnori.yamlファイルが存在します。上書きしますか？"
+				}[(environment.PreferredLocale as NoriLocale) ?? NoriLocale.EnglishBritish],
+				choices: [
+					{ name: "Yes, overwrite the existing nori.yaml", value: "yes" },
+					{ name: "No, cancel initialization", value: "no" }
+				]
+			});
+
+			logger.debug(`User chose to overwrite: ${JSON.stringify(overwrite)}`);
+
+			if (!overwrite.includes("yes")) {
+				logger.info("Initialization cancelled by user.");
+				process.exit(0);
+			}
 		}
 
 		const state = {
-			preferredLocale: await this.prompt({
-				message: {
-					[NoriLocale.EnglishBritish]: "Preferred locale:",
-					[NoriLocale.Japanese]: "希望のロケール:"
-				},
-				choices: NoriLocaleMeta.values.map((locale) => ({
-					name: `${NoriLocaleConfiguration[locale].displayName} (${NoriLocaleConfiguration[locale].description})`,
-					value: locale
-				})),
-				default: NoriLocale.EnglishBritish,
-				validate: (value: string) =>
-					NoriLocaleMeta.values.includes(value as NoriLocale) ||
-					"Please select a valid locale.",
-				onSubmit: (value: string) => {
-					environment.PreferredLocale = value as NoriLocale;
-				}
-			}),
 			author: await this.prompt({
 				message: {
 					[NoriLocale.EnglishBritish]: "Author name:",
@@ -115,5 +146,37 @@ export class Initialiser {
 		};
 
 		logger.debug(`Initialisation state: ${JSON.stringify(state, null, 2)}`);
+
+		const noriYamlContent = `# Nori Configuration File
+preferredLocale: ${environment.PreferredLocale}
+author: ${state.author}
+projectName: ${state.projectName}
+projectDescription: ${state.projectDescription}
+version: ${state.version}
+
+# Add your collections and entries below
+collections:
+    welcome-to-nori:
+        params:
+            username
+                type: string
+                description: "The name of the user."
+        locales:
+            en-GB: "Welcome to Nori, {{username}}!"
+            ja-JP: "ノリへようこそ、{{username}}さん！"
+
+entries:
+    lets-get-started:
+        params:
+            topic:
+                type: string
+                description: "The topic to get started with."
+        locales:
+            en-GB: "Let's get started with {{topic}}."
+            ja-JP: "さあ、{{topic}}を始めましょう！"
+`;
+
+		fs.writeFileSync(norifilePath, noriYamlContent, { encoding: "utf-8" });
+		logger.info(`Created nori.yaml at ${norifilePath}`);
 	}
 }
