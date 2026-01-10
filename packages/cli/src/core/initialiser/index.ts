@@ -68,6 +68,10 @@ export class Initialiser {
 					name: `${NoriLocaleConfiguration[locale].displayName} (${NoriLocaleConfiguration[locale].description})`,
 					value: locale
 				})),
+				default: NoriLocale.EnglishBritish,
+				validate: (value: string) =>
+					NoriLocaleMeta.values.includes(value as NoriLocale) ||
+					"Please select a valid locale.",
 				onSubmit: (value: string) => {
 					environment.PreferredLocale = value as NoriLocale;
 				}
@@ -78,7 +82,8 @@ export class Initialiser {
 					[NoriLocale.Japanese]: "著者名:"
 				},
 				default: process.env.USER || process.env.USERNAME || "Unknown Author",
-				validate: (value: string) => value.length > 0 || "Author name cannot be empty."
+				validate: (value: string) =>
+					value.trim().length > 0 || "Author name cannot be empty."
 			}),
 			projectName: await this.prompt({
 				message: {
@@ -86,14 +91,17 @@ export class Initialiser {
 					[NoriLocale.Japanese]: "プロジェクト名:"
 				},
 				default: path.basename(cwd),
-				validate: (value: string) => value.length > 0 || "Project name cannot be empty."
+				validate: (value: string) =>
+					value.trim().length > 0 || "Project name cannot be empty."
 			}),
 			projectDescription: await this.prompt({
 				message: {
 					[NoriLocale.EnglishBritish]: "Project description:",
 					[NoriLocale.Japanese]: "プロジェクトの説明:"
 				},
-				default: "A Nori project"
+				default: "A Nori project",
+				validate: (value: string) =>
+					value.trim().length > 0 || "Project description cannot be empty."
 			}),
 			version: await this.prompt({
 				message: {
