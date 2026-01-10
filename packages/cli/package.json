@@ -1,0 +1,28 @@
+{
+	"name": "nori",
+	"version": "1.0.0",
+	"description": "Nori CLI is a command-line interface tool for interacting with the Nori platform. It allows users to manage their Nori projects, deploy applications, and perform various tasks directly from the terminal.",
+	"main": "index.js",
+	"bin": {
+		"nori": "bin/nori.js"
+	},
+	"scripts": {
+		"dev": "tsx watch src/index.ts",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"type": "module",
+	"dependencies": {
+		"consola": "^3.4.2",
+		"dotenv": "^17.2.3",
+		"tsx": "^4.21.0",
+		"typescript": "^5.9.3",
+		"yaml": "^2.8.2",
+		"zod": "^4.3.5"
+	},
+	"devDependencies": {
+		"@types/node": "^24.10.6"
+	}
+}
