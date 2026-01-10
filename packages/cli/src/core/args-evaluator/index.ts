@@ -4,9 +4,17 @@ import { loadEnvironment } from "../environment-loader.js";
 import logger, { setLogLevel } from "../logger.js";
 import { Enum, type EnumValue } from "../utils/enum.js";
 
+export type GlobalCliOption = EnumValue<typeof GlobalCliOptions>;
+export const [GlobalCliOptions] = Enum({
+	Verbose: "verbose",
+	Env: "env",
+	LogLevel: "log-level"
+});
+
 export const GlobalCliOptionsSchema = z.object({
-	verbose: z.boolean().optional().default(false),
-	env: z.string().optional()
+	[GlobalCliOptions.Verbose]: z.boolean().optional().default(false),
+	[GlobalCliOptions.Env]: z.string().optional(),
+	[GlobalCliOptions.LogLevel]: z.enum(Object.keys(LogLevels)).optional().default("info")
 });
 
 export const [NoriCommands] = Enum({
@@ -14,28 +22,42 @@ export const [NoriCommands] = Enum({
 	Generate: "generate"
 });
 
-const CommandOptionsMap = {
-	[NoriCommands.Init]: z.object({}),
-	[NoriCommands.Generate]: z.object({
-		output: z.string().optional().default("./output")
-	})
-} as const;
+const ArgumentSideEffectsMap: Record<
+	GlobalCliOption,
+	{ callback: (value: string) => void; description: string }
+> = {
+	[GlobalCliOptions.Verbose]: {
+		callback: (isVerbose: string) => {
+			isVerbose = isVerbose.trim().toLowerCase();
+			if (!isVerbose) throw new Error("Invalid value for verbose argument");
 
-const ArgumentSideEffectsMap = {
-	verbose: {
-		callback: (isVerbose: boolean) => {
-			if (!isVerbose) return;
+			const truthyValues = ["true", "1", "yes", "y"];
+			const isVerboseTruthy = truthyValues.includes(isVerbose);
+			if (!isVerboseTruthy) return;
+
 			setLogLevel(LogLevels.debug);
 			logger.debug("Verbose mode enabled");
 		},
 		description: "Enable verbose logging"
 	},
 
-	env: {
+	[GlobalCliOptions.Env]: {
 		callback: (envPath: string) => {
 			loadEnvironment(envPath);
 		},
 		description: "Path to the environment file"
+	},
+
+	[GlobalCliOptions.LogLevel]: {
+		callback: (level: string) => {
+			const logLevel = LogLevels[level as keyof typeof LogLevels];
+			if (logLevel === undefined) {
+				throw new Error(`Invalid log level: ${level}`);
+			}
+			setLogLevel(logLevel);
+			logger.debug(`Log level set to ${level}`);
+		},
+		description: "Set the logging level"
 	}
 } as const;
 

@@ -12,6 +12,40 @@ import { input, select, Separator } from "@inquirer/prompts";
 
 /** Initialiser is responsible for setting up the initial configuration and environment for the CLI tool. (i.e. nori --init ) */
 export class Initialiser {
+	private static async prompt(options: {
+		message: Record<NoriLocale, string>;
+		default?: string;
+		choices?: Array<{ name: string; value: string } | Separator>;
+		validate?: (value: string) => boolean | string;
+		onSubmit?: (value: string) => void;
+	}): Promise<string> {
+		const { message, default: defaultValue, validate, choices } = options;
+		const localizedMessage =
+			message[environment.PreferredLocale as NoriLocale] ||
+			message[NoriLocale.EnglishBritish];
+
+		let answer: string;
+
+		if (choices) {
+			logger.debug(`Prompting user with choices: ${JSON.stringify(choices)}`);
+			answer = await select({
+				message: localizedMessage,
+				choices
+			});
+			logger.debug(`User selected: ${answer}`);
+		} else {
+			answer = await input({
+				message: localizedMessage,
+				...(defaultValue ? { default: defaultValue } : {}),
+				...(validate ? { validate } : {})
+			});
+			logger.debug(`User entered: ${answer}`);
+		}
+
+		options.onSubmit?.(answer);
+		return answer;
+	}
+
 	public static async initialiseProject(): Promise<void> {
 		// want to do a very similar experience to things like git --init, npm init, et cetera.
 		// Should hand hold devs through the experience of setting up a nori project.
@@ -24,30 +58,54 @@ export class Initialiser {
 			return;
 		}
 
-		const preferredLocale =
-			environment.PreferredLocale in NoriLocale ? environment.PreferredLocale : undefined;
+		const state = {
+			preferredLocale: await this.prompt({
+				message: {
+					[NoriLocale.EnglishBritish]: "Preferred locale:",
+					[NoriLocale.Japanese]: "希望のロケール:"
+				},
+				choices: NoriLocaleMeta.values.map((locale) => ({
+					name: `${NoriLocaleConfiguration[locale].displayName} (${NoriLocaleConfiguration[locale].description})`,
+					value: locale
+				})),
+				onSubmit: (value: string) => {
+					environment.PreferredLocale = value as NoriLocale;
+				}
+			}),
+			author: await this.prompt({
+				message: {
+					[NoriLocale.EnglishBritish]: "Author name:",
+					[NoriLocale.Japanese]: "著者名:"
+				},
+				default: process.env.USER || process.env.USERNAME || "Unknown Author",
+				validate: (value: string) => value.length > 0 || "Author name cannot be empty."
+			}),
+			projectName: await this.prompt({
+				message: {
+					[NoriLocale.EnglishBritish]: "Project name:",
+					[NoriLocale.Japanese]: "プロジェクト名:"
+				},
+				default: path.basename(cwd),
+				validate: (value: string) => value.length > 0 || "Project name cannot be empty."
+			}),
+			projectDescription: await this.prompt({
+				message: {
+					[NoriLocale.EnglishBritish]: "Project description:",
+					[NoriLocale.Japanese]: "プロジェクトの説明:"
+				},
+				default: "A Nori project"
+			}),
+			version: await this.prompt({
+				message: {
+					[NoriLocale.EnglishBritish]: "Version:",
+					[NoriLocale.Japanese]: "バージョン:"
+				},
+				default: "1.0.0",
+				validate: (value: string) =>
+					/^\d+\.\d+\.\d+$/.test(value) || "Version must be in the format x.y.z"
+			})
+		};
 
-		if (!preferredLocale) {
-			logger.info("No preferred locale set. Let's set one up now.");
-
-			const localeOptions = NoriLocaleMeta.values.map((locale) => ({
-				name: `${NoriLocaleConfiguration[locale].displayName} (${NoriLocaleConfiguration[locale].description})`,
-				value: locale
-			}));
-
-			const answers = await select({
-				message: "Select your preferred locale:",
-				choices: localeOptions
-			});
-
-			logger.debug(`User selected locale: ${answers}`);
-
-			environment.PreferredLocale = answers;
-			if (NoriLocaleMeta.evaluateIsValue(answers)) {
-				logger.success(
-					`Preferred locale set to ${NoriLocaleConfiguration[answers].displayName}`
-				);
-			}
-		}
+		logger.debug(`Initialisation state: ${JSON.stringify(state, null, 2)}`);
 	}
 }
