@@ -1,8 +1,8 @@
 # Nori Configuration File
 preferredLocale: ja-JP
-author: torippi
-projectName: cli
-projectDescription: A Nori project
+author: natto
+projectName: yummy
+projectDescription: norimaki
 version: 1.0.0
 
 # Add your collections and entries below

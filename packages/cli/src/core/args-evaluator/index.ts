@@ -12,7 +12,7 @@ export const [GlobalCliOptions] = Enum({
 });
 
 export const GlobalCliOptionsSchema = z.object({
-	[GlobalCliOptions.Verbose]: z.boolean().optional().default(false),
+	[GlobalCliOptions.Verbose]: z.string().optional().default("false"),
 	[GlobalCliOptions.Env]: z.string().optional(),
 	[GlobalCliOptions.LogLevel]: z.enum(Object.keys(LogLevels)).optional().default("info")
 });
@@ -28,7 +28,7 @@ const ArgumentSideEffectsMap: Record<
 > = {
 	[GlobalCliOptions.Verbose]: {
 		callback: (isVerbose: string) => {
-			isVerbose = isVerbose.trim().toLowerCase();
+			isVerbose = isVerbose?.trim().toLowerCase();
 			if (!isVerbose) throw new Error("Invalid value for verbose argument");
 
 			const truthyValues = ["true", "1", "yes", "y"];
