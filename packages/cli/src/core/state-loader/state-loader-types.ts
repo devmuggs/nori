@@ -1,4 +1,4 @@
-import { environment } from "../environment-loader.js";
+import { is } from "zod/locales";
 import { Enum, type EnumValue } from "../utils/enum.js";
 
 export type NoriLocale = EnumValue<typeof NoriLocale>;
@@ -27,7 +27,8 @@ export type NoriLocaleItemParamOption = EnumValue<typeof NoriLocaleItemParamOpti
 export const [NoriLocaleItemParamOptions] = Enum({
 	Description: "description",
 	Type: "type",
-	Default: "default"
+	Default: "default",
+	Optional: "optional"
 });
 
 export type NoriEntryParamType = EnumValue<typeof NoriEntryParamType>;
@@ -37,19 +38,34 @@ export const [NoriEntryParamType] = Enum({
 	Number: "number"
 });
 
-export type NoriI18nCollection = Record<NoriLocale, string>;
-export const NoriI18nCollection = (
-	locales: Partial<Record<NoriLocale, string>>,
-	defaultLocale: NoriLocale = NoriLocale.EnglishBritish
-): NoriI18nCollection => {
-	const collection: NoriI18nCollection = {
-		[NoriLocale.EnglishBritish]: "",
-		[NoriLocale.Japanese]: ""
+export interface NoriI18nCollection extends Readonly<Partial<Record<NoriLocale, string>>> {
+	_meta: {
+		kind: "noriI18nCollection";
+	};
+}
+
+export const createNoriI18nCollection =
+	<TProps extends Record<string, unknown> | never = never>(
+		builder: (props: TProps) => Record<NoriLocale, string>
+	) =>
+	(props: TProps): NoriI18nCollection => {
+		return {
+			...builder(props),
+			_meta: {
+				kind: "noriI18nCollection"
+			}
+		};
 	};
 
-	for (const localeKey of Object.values(NoriLocale)) {
-		collection[localeKey] = locales[localeKey] ?? locales[defaultLocale] ?? "";
+export const isNoriI18nCollection = (obj: unknown): obj is NoriI18nCollection => {
+	if (typeof obj !== "object" || obj === null) return false;
+	const record = obj as Record<string, unknown>;
+	if ((record["_meta"] as { _kind?: string })?._kind !== "noriI18nCollection") return false;
+	for (const localeKey of Object.keys(NoriLocale)) {
+		const localeValue = NoriLocale[localeKey as keyof typeof NoriLocale];
+		if (typeof record[localeValue] !== "string") {
+			return false;
+		}
 	}
-
-	return collection;
+	return true;
 };

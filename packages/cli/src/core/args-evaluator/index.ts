@@ -1,65 +1,7 @@
-import { LogLevels } from "consola";
 import z from "zod";
-import { loadEnvironment } from "../environment-loader.js";
-import logger, { setLogLevel } from "../logger.js";
-import { Enum, type EnumValue } from "../utils/enum.js";
-
-export type GlobalCliOption = EnumValue<typeof GlobalCliOptions>;
-export const [GlobalCliOptions] = Enum({
-	Verbose: "verbose",
-	Env: "env",
-	LogLevel: "log-level"
-});
-
-export const GlobalCliOptionsSchema = z.object({
-	[GlobalCliOptions.Verbose]: z.string().optional().default("false"),
-	[GlobalCliOptions.Env]: z.string().optional(),
-	[GlobalCliOptions.LogLevel]: z.enum(Object.keys(LogLevels)).optional().default("info")
-});
-
-export const [NoriCommands] = Enum({
-	Init: "--init",
-	Generate: "generate"
-});
-
-const ArgumentSideEffectsMap: Record<
-	GlobalCliOption,
-	{ callback: (value: string) => void; description: string }
-> = {
-	[GlobalCliOptions.Verbose]: {
-		callback: (isVerbose: string) => {
-			isVerbose = isVerbose?.trim().toLowerCase();
-			if (!isVerbose) throw new Error("Invalid value for verbose argument");
-
-			const truthyValues = ["true", "1", "yes", "y"];
-			const isVerboseTruthy = truthyValues.includes(isVerbose);
-			if (!isVerboseTruthy) return;
-
-			setLogLevel(LogLevels.debug);
-			logger.debug("Verbose mode enabled");
-		},
-		description: "Enable verbose logging"
-	},
-
-	[GlobalCliOptions.Env]: {
-		callback: (envPath: string) => {
-			loadEnvironment(envPath);
-		},
-		description: "Path to the environment file"
-	},
-
-	[GlobalCliOptions.LogLevel]: {
-		callback: (level: string) => {
-			const logLevel = LogLevels[level as keyof typeof LogLevels];
-			if (logLevel === undefined) {
-				throw new Error(`Invalid log level: ${level}`);
-			}
-			setLogLevel(logLevel);
-			logger.debug(`Log level set to ${level}`);
-		},
-		description: "Set the logging level"
-	}
-} as const;
+import logger from "../logger.js";
+import { GlobalCliOptionsSchema, NoriCommand } from "./arg-evaluator-types.js";
+import { ArgumentSideEffectsMap } from "./arg-side-effects.js";
 
 class CommandEvaluator {
 	private static _command: string | undefined;
@@ -131,7 +73,7 @@ class CommandEvaluator {
 	};
 
 	public static executeCommand(
-		commandExecutionMap: Record<EnumValue<typeof NoriCommands>, () => Promise<void> | void>
+		commandExecutionMap: Record<NoriCommand, (args: unknown) => Promise<void> | void>
 	) {
 		const command = this.command;
 
@@ -140,14 +82,14 @@ class CommandEvaluator {
 			process.exit(1);
 		}
 
-		const commandFunc = commandExecutionMap[command as EnumValue<typeof NoriCommands>];
+		const commandFunc = commandExecutionMap[command as NoriCommand];
 
 		if (!commandFunc) {
 			logger.error(`Unknown command: ${command}`);
 			process.exit(1);
 		}
 
-		return commandFunc();
+		return commandFunc(this.args);
 	}
 }
 

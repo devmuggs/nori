@@ -1,22 +1,35 @@
 import logger from "../logger.js";
-import type { NoriManager } from "../state-loader/index.js";
-import { Enum } from "../utils/enum.js";
+import type { NoriCollection, NoriEntry } from "../state-loader/index.js";
+import { Enum, type EnumValue } from "../utils/enum.js";
+import { TypeScriptCodeGenerator } from "./typescript-code-generator/index.js";
 
-const [SupportedCodeGenerators] = Enum({
+export type SupportedCodeGenerator = EnumValue<typeof SupportedCodeGenerator>;
+export const [SupportedCodeGenerator] = Enum({
 	TypeScript: "typescript",
 	Python: "python"
 });
 
-export type CodeGeneratorStrategy = (noriManager: NoriManager) => Promise<void>;
-
-export const CodeGenerators: Record<
-	(typeof SupportedCodeGenerators)[keyof typeof SupportedCodeGenerators],
-	CodeGeneratorStrategy
-> = {
-	[SupportedCodeGenerators.TypeScript]: async (noriManager: NoriManager) => {
-		logger.debug("TypeScript code generator is not yet implemented.");
-	},
-	[SupportedCodeGenerators.Python]: async (noriManager: NoriManager) => {
-		logger.debug("Python code generator is not yet implemented.");
+export const codeGeneratorFactory = (generatorType: SupportedCodeGenerator): ICodeGenerator => {
+	switch (generatorType) {
+		case SupportedCodeGenerator.TypeScript: {
+			return new TypeScriptCodeGenerator();
+		}
+		default: {
+			logger.error(`Unsupported code generator type: ${generatorType}`);
+			throw new Error(`Unsupported code generator type: ${generatorType}`);
+		}
 	}
-} as const;
+};
+
+export interface ICodeGenerator {
+	generateCode(): string;
+	generateFileHeader(): string;
+
+	generateManager(): string;
+
+	generateCollection(collection: NoriCollection): string;
+
+	generateEntryFunctionSignature(entry: NoriEntry): string;
+	generateEntryFunctionBody(entry: NoriEntry): string;
+	generateEntry(entry: NoriEntry): string;
+}

@@ -16,7 +16,8 @@ export const INoriEntryParam = z.record(
 	z.object({
 		[NoriLocaleItemParamOptions.Description]: LocaleStringCollectionOrStringSchema.optional(),
 		[NoriLocaleItemParamOptions.Type]: z.enum(NoriEntryParamType),
-		[NoriLocaleItemParamOptions.Default]: LocaleStringCollectionOrStringSchema.optional()
+		[NoriLocaleItemParamOptions.Default]: LocaleStringCollectionOrStringSchema.optional(),
+		[NoriLocaleItemParamOptions.Optional]: z.enum(["true", "false"]).optional()
 	})
 );
 

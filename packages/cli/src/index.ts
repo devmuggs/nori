@@ -1,8 +1,16 @@
+import {
+	codeGeneratorFactory,
+	environment,
+	Initialiser,
+	loadEnvironment,
+	NoriManager,
+	SupportedCodeGenerator
+} from "@nori";
+import { NoriCommand } from "@nori/args-evaluator/arg-evaluator-types.js";
+import CommandEvaluator from "@nori/args-evaluator/index.js";
+import logger from "@nori/logger.js";
 import fs from "fs";
-import CommandEvaluator, { NoriCommands } from "./core/args-evaluator/index.js";
 import { TypeScriptCodeGenerator } from "./core/code-generators/typescript-code-generator/index.js";
-
-import { Initialiser, NoriManager, environment, loadEnvironment, logger } from "@nori";
 
 const main = async () => {
 	logger.success("CLI started");
@@ -13,22 +21,34 @@ const main = async () => {
 	if (!("env" in args)) loadEnvironment("../../.env");
 
 	await CommandEvaluator.executeCommand({
-		[NoriCommands.Init]: async () => {
+		[NoriCommand.Init]: async () => {
 			logger.info("Initializing Nori project...");
 			await Initialiser.initialiseProject();
 			logger.success("Project initialized.");
 		},
-		[NoriCommands.Generate]: async () => {
+
+		[NoriCommand.Generate]: async () => {
 			environment.NoriYamlPath
 				? logger.info(`Using Nori YAML at ${environment.NoriYamlPath}`)
 				: logger.warn("No Nori YAML path specified; using default path.");
+
 			if (!environment.NoriYamlPath) {
 				logger.error("NORI_YAML_PATH environment variable is not set.");
 				process.exit(1);
 			}
+
 			logger.info("Generating...");
+
 			await NoriManager.loadFromYaml();
-			const tsCode = await TypeScriptCodeGenerator();
+
+			const generator = codeGeneratorFactory(SupportedCodeGenerator.TypeScript);
+			if (!(generator instanceof TypeScriptCodeGenerator)) {
+				logger.error("Selected code generator is not TypeScriptCodeGenerator.");
+				process.exit(1);
+			}
+
+			const tsCode = generator.generateCode();
+
 			// Output the generated code to a file or stdout as needed
 			fs.writeFileSync("nori-generated.ts", tsCode);
 			logger.success("Generation complete.");
