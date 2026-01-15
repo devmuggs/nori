@@ -14,6 +14,14 @@ export const Enum = <const T extends Record<string | number | symbol, unknown>>(
 				(typeof key === "string" || typeof key === "number" || typeof key === "symbol") &&
 				key in enumObj
 			);
+		},
+		reverseLookup: (value: EnumValue<T>): EnumKey<T> | undefined => {
+			for (const [key, val] of Object.entries(enumObj) as [EnumKey<T>, EnumValue<T>][]) {
+				if (val === value) {
+					return key;
+				}
+			}
+			return undefined;
 		}
 	});
 

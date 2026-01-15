@@ -1,23 +1,36 @@
 # Nori Configuration File
-preferredLocale: ja-JP
-author: natto
-projectName: yummy
-projectDescription: norimaki
+preferredLocale: en-GB
+author: tristan
+projectName: cli
+projectDescription: A Nori project
 version: 1.0.0
 
 # Add your collections and entries below
 collections:
-    welcome-to-nori:
-        params:
-            username
-                type: string
-                description: "The name of the user."
-        locales:
-            en-GB: "Welcome to Nori, {{username}}!"
-            ja-JP: "ノリへようこそ、{{username}}さん！"
+    client:
+        description: "Client-specific messages."
+
+        entries:
+            welcome-to-nori:
+                description: "Greeting message for new users on home page."
+                params:
+                    username:
+                        type: string
+                        description: "The name of the user."
+                        default: "guest"
+                locales:
+                    en-GB: "Welcome to Nori, {{username}}!"
+                    ja-JP: "ノリへようこそ、{{username}}さん！"
+
+            good-morning:
+                description: "Morning greeting message."
+                locales:
+                    en-GB: "Good morning!"
+                    ja-JP: "おはようございます！"
 
 entries:
     lets-get-started:
+        description: "Displayed on first step of onboarding wizard."
         params:
             topic:
                 type: string

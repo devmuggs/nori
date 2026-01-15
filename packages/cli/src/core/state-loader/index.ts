@@ -8,6 +8,7 @@ import { readYamlFile } from "./utils.js";
 
 export class NoriEntry {
 	public readonly id: string;
+	public readonly description?: INoriEntry["description"];
 	public readonly params: INoriEntry["params"];
 	public readonly locales: INoriEntry["locales"];
 
@@ -34,11 +35,13 @@ export class NoriEntry {
 
 export class NoriCollection {
 	public readonly id: string;
+	public readonly description?: INoriCollection["description"];
 	public readonly collections: Map<string, NoriCollection> = new Map();
 	public readonly entries: Map<string, NoriEntry> = new Map();
 
 	constructor(id: string, params: INoriCollection) {
 		this.id = id;
+		this.description = params.description ?? undefined;
 
 		if (params.collections) {
 			this.collections = new Map(
@@ -128,3 +131,7 @@ export class NoriManager {
 		logger.debug(outputStrings.join("\n"));
 	}
 }
+
+export * from "./state-loader-schemas.js";
+export * from "./state-loader-types.js";
+export * from "./utils.js";

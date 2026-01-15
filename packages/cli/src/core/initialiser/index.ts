@@ -178,5 +178,35 @@ entries:
 
 		fs.writeFileSync(norifilePath, noriYamlContent, { encoding: "utf-8" });
 		logger.info(`Created nori.yaml at ${norifilePath}`);
+
+		logger.info("Nori project initialized successfully!");
+
+		const envFilePath = path.join(cwd, ".env");
+		if (!fs.existsSync(envFilePath)) {
+			const createEnv = await select({
+				message: {
+					[NoriLocale.EnglishBritish]:
+						"Do you want to create a .env file for environment variables?",
+					[NoriLocale.Japanese]: ".envファイルを作成しますか？"
+				}[(environment.PreferredLocale as NoriLocale) ?? NoriLocale.EnglishBritish],
+				choices: [
+					{ name: "Yes, create .env file", value: "yes" },
+					{ name: "No, skip", value: "no" }
+				]
+			});
+
+			if (createEnv.includes("yes")) {
+				fs.writeFileSync(
+					envFilePath,
+					"# Environment variables for Nori\nNORI_YAML_PATH=./nori.yaml\nPREFERRED_LOCALE=" +
+						(environment.PreferredLocale ?? "en-GB") +
+						"\n",
+					{
+						encoding: "utf-8"
+					}
+				);
+				logger.info(`Created .env file at ${envFilePath}`);
+			}
+		}
 	}
 }

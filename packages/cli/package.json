@@ -1,22 +1,49 @@
 {
-	"name": "nori",
+	"name": "@nori/cli",
 	"version": "1.0.0",
 	"description": "Nori CLI is a command-line interface tool for interacting with the Nori platform. It allows users to manage their Nori projects, deploy applications, and perform various tasks directly from the terminal.",
-	"main": "index.js",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
 	"bin": {
 		"nori": "bin/nori.js"
 	},
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./core": {
+			"types": "./dist/core/index.d.ts",
+			"import": "./dist/core/index.js"
+		}
+	},
+	"files": [
+		"dist",
+		"bin"
+	],
 	"scripts": {
+		"build": "tsc",
 		"dev": "tsx watch src/index.ts",
+		"prepublishOnly": "npm run build",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
-	"keywords": [],
-	"author": "",
+	"keywords": [
+		"nori",
+		"cli",
+		"i18n",
+		"localization",
+		"internationalization",
+		"translation",
+		"tooling",
+		"developer",
+		"command-line",
+		"typescript"
+	],
+	"author": "Tristan Muggridge",
 	"license": "ISC",
 	"type": "module",
 	"dependencies": {
 		"@inquirer/prompts": "^8.1.0",
-		"@types/inquirer": "^9.0.9",
 		"consola": "^3.4.2",
 		"dotenv": "^17.2.3",
 		"tsx": "^4.21.0",
@@ -25,6 +52,7 @@
 		"zod": "^4.3.5"
 	},
 	"devDependencies": {
-		"@types/node": "^24.10.6"
+		"@types/node": "^24.10.6",
+		"@types/inquirer": "^9.0.9"
 	}
 }

@@ -3,9 +3,7 @@
 	"compilerOptions": {
 		// File Layout
 		"rootDir": "./src",
-		// "outDir": "./dist",
-
-		// Environment Settings
+		"outDir": "./dist",
 		// See also https://aka.ms/tsconfig/module
 		"module": "nodenext",
 		"target": "esnext",
@@ -38,6 +36,15 @@
 		"isolatedModules": true,
 		"noUncheckedSideEffectImports": true,
 		"moduleDetection": "force",
-		"skipLibCheck": true
-	}
+		"skipLibCheck": true,
+
+		// Path Mappings
+		"paths": {
+			"@nori": ["./src/core/index.ts"],
+			"@nori/*": ["./src/core/*"]
+		},
+
+	},
+
+	"include": ["src/**/*"]
 }

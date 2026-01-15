@@ -1,6 +1,6 @@
 import z from "zod";
 import {
-	NoriEntryParamTypes,
+	NoriEntryParamType,
 	NoriLocale,
 	NoriLocaleItemParamOptions
 } from "./state-loader-types.js";
@@ -10,30 +10,31 @@ export const YamlKeySchema = z.string().regex(YamlKeyRegex);
 export const LocaleStringSchema = z.record(z.enum(NoriLocale), z.string());
 export const LocaleStringCollectionOrStringSchema = z.union([LocaleStringSchema, z.string()]);
 
+export type INoriEntryParam = z.infer<typeof INoriEntryParam>;
+export const INoriEntryParam = z.record(
+	YamlKeySchema,
+	z.object({
+		[NoriLocaleItemParamOptions.Description]: LocaleStringCollectionOrStringSchema.optional(),
+		[NoriLocaleItemParamOptions.Type]: z.enum(NoriEntryParamType),
+		[NoriLocaleItemParamOptions.Default]: LocaleStringCollectionOrStringSchema.optional()
+	})
+);
+
 export type INoriEntry = z.infer<typeof INoriEntry>;
 export const INoriEntry = z.object({
-	params: z
-		.record(
-			YamlKeySchema,
-			z.object({
-				[NoriLocaleItemParamOptions.Description]:
-					LocaleStringCollectionOrStringSchema.optional(),
-				[NoriLocaleItemParamOptions.Type]: z.enum(NoriEntryParamTypes),
-				[NoriLocaleItemParamOptions.Default]:
-					LocaleStringCollectionOrStringSchema.optional()
-			})
-		)
-		.optional(),
+	description: LocaleStringCollectionOrStringSchema.optional(),
+	params: INoriEntryParam.optional(),
 	locales: LocaleStringSchema.optional()
 });
 
 export type INoriCollection = z.infer<typeof INoriCollection>;
 export const INoriCollection = z.object({
+	description: LocaleStringCollectionOrStringSchema.optional(),
 	entries: z.record(YamlKeySchema, INoriEntry),
 	collections: z
-		.partialRecord(
+		.record(
 			YamlKeySchema,
-			z.lazy((): z.ZodTypeAny => INoriCollection)
+			z.lazy((): z.ZodType => INoriCollection)
 		)
 		.optional()
 });
