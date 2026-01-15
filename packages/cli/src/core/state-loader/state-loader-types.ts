@@ -1,4 +1,3 @@
-import { is } from "zod/locales";
 import { Enum, type EnumValue } from "../utils/enum.js";
 
 export type NoriLocale = EnumValue<typeof NoriLocale>;
@@ -46,15 +45,15 @@ export interface NoriI18nCollection extends Readonly<Partial<Record<NoriLocale, 
 
 export const createNoriI18nCollection =
 	<TProps extends Record<string, unknown> | never = never>(
-		builder: (props: TProps) => Record<NoriLocale, string>
+		builder: (props: TProps) => Omit<NoriI18nCollection, "_meta">
 	) =>
 	(props: TProps): NoriI18nCollection => {
-		return {
+		return Object.freeze({
 			...builder(props),
 			_meta: {
 				kind: "noriI18nCollection"
-			}
-		};
+			} as const
+		} as const) as NoriI18nCollection;
 	};
 
 export const isNoriI18nCollection = (obj: unknown): obj is NoriI18nCollection => {
