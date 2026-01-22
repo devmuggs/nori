@@ -128,7 +128,7 @@ ${
 ${Object.values(NoriLocale)
 	.map((localeKey) => {
 		const localeString = entry.locales?.[localeKey] ?? `${entry.id} [${localeKey}]`;
-		return `\t\t\t\t[NoriLocale.${NoriLocaleMeta.reverseLookup(
+		return `\t\t\t\t[NoriLocale.${NoriLocaleMeta.nume(
 			localeKey
 		)}]: \`${localeString.replace(/{{\s*(\w+)\s*}}/g, "${$1}")}\``;
 	})

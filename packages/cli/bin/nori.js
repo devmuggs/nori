@@ -8,4 +8,4 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const tsxPath = join(__dirname, "../node_modules/.bin/tsx");
 
-execSync(`"${tsxPath}" src/index.ts ${process.argv.slice(2).join(" ")}`, { stdio: "inherit" });
+execSync(`"${tsxPath}" src/nori.ts ${process.argv.slice(2).join(" ")}`, { stdio: "inherit" });
