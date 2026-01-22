@@ -86,15 +86,14 @@ export const CommandConfig: Record<Command, { description: string }> = {
 	}
 };
 
-export type ArgumentShapeFlagEvaluatorFunction = (arg: string) => { key: string; value: boolean };
-export type ArgumentShapeKeyValueEvaluatorFunction = (arg: string) => {
+export type KeyValuePair<TValue> = Readonly<{
 	key: string;
-	value: string;
-};
-export type ArgumentShapeKeyEqualsValueEvaluatorFunction = (arg: string) => {
-	key: string;
-	value: string;
-};
+	value: TValue;
+}>;
+
+export type ArgumentShapeFlagEvaluatorFunction = (arg: string) => KeyValuePair<boolean>;
+export type ArgumentShapeKeyValueEvaluatorFunction = (arg: string) => KeyValuePair<string>;
+export type ArgumentShapeKeyEqualsValueEvaluatorFunction = (arg: string) => KeyValuePair<string>;
 
 export type ArgumentShapeEvaluatorMap = {
 	[ArgumentShape.Flag]: ArgumentShapeFlagEvaluatorFunction;

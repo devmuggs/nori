@@ -1,4 +1,4 @@
-import { ArgumentShape, type ArgumentShapeEvaluatorMap } from "./cli-types.js";
+import { ArgumentShape, type ArgumentShapeEvaluatorMap, type KeyValuePair } from "./cli-types.js";
 
 /** Evaluate the shape of a given argument string
  * @param arg The argument string to evaluate
@@ -17,31 +17,31 @@ export const evaluateArgumentShape = (arg: string): ArgumentShape => {
 	throw new Error(`Unable to evaluate argument shape for: ${arg}`);
 };
 
-export const ArgumentShapeEvaluators: ArgumentShapeEvaluatorMap = {
-	[ArgumentShape.Flag]: (arg: string) => {
-		const fullKey = arg; // remove leading '--'
-		const key = fullKey.startsWith("--") ? fullKey.slice(2) : fullKey;
-		if (!key?.trim()) throw new Error(`Invalid flag argument format: ${arg}`);
-		return { key, value: true };
-	},
-	[ArgumentShape.KeyValue]: (arg: string) => {
-		const [fullKey, value] = arg.split(" ");
-		const key = fullKey && fullKey.startsWith("--") ? fullKey.slice(2) : fullKey;
+const normaliseKey = (fullKey: string | undefined): string => {
+	return fullKey && fullKey.startsWith("--") ? fullKey.slice(2) : fullKey || "";
+};
 
-		if (!key?.trim() || !value) {
-			throw new Error(`Invalid key-value argument format: ${arg}`);
-		}
-
-		return { key, value };
-	},
-	[ArgumentShape.KeyEqualsValue]: (arg: string) => {
-		const [fullKey, value] = arg.split("=");
-		const key = fullKey && fullKey.startsWith("--") ? fullKey.slice(2) : fullKey;
-
-		if (!key?.trim() || !value) {
-			throw new Error(`Invalid key-equals-value argument format: ${arg}`);
-		}
-
-		return { key, value };
+class ArgumentShapeError extends Error {
+	constructor(arg: string, message = `Invalid argument format for shape evaluation: ${arg}`) {
+		super(message);
+		this.name = "ArgumentShapeError";
 	}
+}
+
+const extractKeyValuePair = <TValue extends string | boolean>(
+	arg: string,
+	delimiter: string | undefined,
+	defaultValue?: TValue
+): { key: string; value: TValue } => {
+	const [fullKey, value] = delimiter ? arg.split(delimiter) : [arg, defaultValue];
+	const key = normaliseKey(fullKey);
+	if (!key?.trim() || value === undefined) throw new ArgumentShapeError(arg);
+	return Object.freeze({ key, value: value as TValue });
+};
+
+/** Evaluators for each ArgumentShape */
+export const ArgumentShapeEvaluators: ArgumentShapeEvaluatorMap = {
+	[ArgumentShape.Flag]: (arg: string) => extractKeyValuePair<boolean>(arg, undefined, true),
+	[ArgumentShape.KeyValue]: (arg: string) => extractKeyValuePair<string>(arg, " "),
+	[ArgumentShape.KeyEqualsValue]: (arg: string) => extractKeyValuePair<string>(arg, "=")
 };
