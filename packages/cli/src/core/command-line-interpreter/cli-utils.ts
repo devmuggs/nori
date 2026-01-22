@@ -28,11 +28,11 @@ class ArgumentShapeError extends Error {
 	}
 }
 
-const extractKeyValuePair = <TValue extends string | boolean>(
+const extractKeyValuePair = <TValue extends string | boolean = string>(
 	arg: string,
 	delimiter: string | undefined,
 	defaultValue?: TValue
-): { key: string; value: TValue } => {
+): KeyValuePair<TValue> => {
 	const [fullKey, value] = delimiter ? arg.split(delimiter) : [arg, defaultValue];
 	const key = normaliseKey(fullKey);
 	if (!key?.trim() || value === undefined) throw new ArgumentShapeError(arg);
@@ -41,7 +41,7 @@ const extractKeyValuePair = <TValue extends string | boolean>(
 
 /** Evaluators for each ArgumentShape */
 export const ArgumentShapeEvaluators: ArgumentShapeEvaluatorMap = {
-	[ArgumentShape.Flag]: (arg: string) => extractKeyValuePair<boolean>(arg, undefined, true),
-	[ArgumentShape.KeyValue]: (arg: string) => extractKeyValuePair<string>(arg, " "),
-	[ArgumentShape.KeyEqualsValue]: (arg: string) => extractKeyValuePair<string>(arg, "=")
+	[ArgumentShape.Flag]: (arg: string) => extractKeyValuePair(arg, undefined, true),
+	[ArgumentShape.KeyValue]: (arg: string) => extractKeyValuePair(arg, " "),
+	[ArgumentShape.KeyEqualsValue]: (arg: string) => extractKeyValuePair(arg, "=")
 };
