@@ -4,10 +4,12 @@ import { ArgumentShape } from "./cli-types.js";
 import { ArgumentShapeEvaluators, evaluateArgumentShape } from "./cli-utils.js";
 
 /** Evaluates and processes Nori CLI arguments */
-export default class CommandLineInterpreter implements CommandLineInterpreter {
+export default class CommandLineInterpreter {
 	public static argStrings: readonly string[];
-	public static command: Command | undefined;
-	public static args: ArgSchema;
+	private static _command: Command =
+		process.argv.length > 2 ? (process.argv[2] as Command) : undefined;
+
+	private static _args: ArgSchema;
 
 	public static start = () => {
 		const argv = process.argv.slice(2);
@@ -22,18 +24,19 @@ export default class CommandLineInterpreter implements CommandLineInterpreter {
 		const isValidCommand = CommandMeta.evaluateIsValue(commandString);
 		logger.trace(`Is valid command: ${isValidCommand}`);
 
-		CommandLineInterpreter.command = isValidCommand ? (commandString as Command) : undefined;
+		CommandLineInterpreter._command = isValidCommand ? (commandString as Command) : undefined;
 		CommandLineInterpreter.argStrings = Object.freeze(isValidCommand ? argv.slice(1) : argv);
 	};
 
-	public get command(): Command | undefined {
-		return CommandLineInterpreter.command;
+	public static get command(): Command | undefined {
+		return CommandLineInterpreter._command;
 	}
 
 	/** Interpret CLI arguments and apply to _args */
-	public get args(): ArgSchema {
-		if (CommandLineInterpreter.args) return CommandLineInterpreter.args;
+	public static get args(): ArgSchema {
+		if (CommandLineInterpreter._args) return CommandLineInterpreter._args;
 
+		logger.debug("Parsing CLI arguments:", CommandLineInterpreter.argStrings);
 		const kvPairs: Record<string, string | boolean> = {};
 
 		for (let i = 0; i < CommandLineInterpreter.argStrings.length; i++) {
@@ -52,11 +55,11 @@ export default class CommandLineInterpreter implements CommandLineInterpreter {
 		}
 
 		const schemaToUse = CommandLineInterpreter.command
-			? ArgSchemas[CommandLineInterpreter.command as keyof typeof ArgSchemas]
+			? ArgSchemas[CommandLineInterpreter.command]
 			: ArgSchemaBase;
 
 		try {
-			CommandLineInterpreter.args = schemaToUse.parse({
+			CommandLineInterpreter._args = schemaToUse.parse({
 				...kvPairs,
 				kind: CommandLineInterpreter.command ? CommandLineInterpreter.command : "base"
 			});
@@ -66,6 +69,6 @@ export default class CommandLineInterpreter implements CommandLineInterpreter {
 			throw error;
 		}
 
-		return CommandLineInterpreter.args;
+		return CommandLineInterpreter._args;
 	}
 }

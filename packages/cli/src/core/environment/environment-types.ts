@@ -1,4 +1,3 @@
-import path from "path/win32";
 import z from "zod";
 import { NoriLocale } from "../state-loader/state-loader-types.js";
 import { Enum, type EnumValue } from "../utils/enum.js";
@@ -29,7 +28,7 @@ export const [EnvironmentVariable] = Enum({
 
 export type NoriEnvironmentType = z.infer<typeof NoriEnvironmentSchema>;
 export const NoriEnvironmentSchema = z.object({
-	envFilePath: z.string().optional().default(path.resolve(process.cwd(), ".nori.env")),
+	envFilePath: z.string().optional().default(".env"),
 	input: z
 		.object({
 			target: z.string().default("./nori.yaml")

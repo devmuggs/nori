@@ -122,9 +122,9 @@ export const GenerateArgSchema = ArgSchemaBase.extend({
 	});
 
 export type ArgSchemasType = typeof ArgSchemas;
-export const ArgSchemas = {
+export const ArgSchemas = CommandMeta.derive({
 	[Command.Generate]: GenerateArgSchema
-} as const;
+});
 
 export type ArgSchema = z.infer<typeof ArgSchema>;
 export const ArgSchema = z.discriminatedUnion("kind", [GenerateArgSchema, ArgSchemaBase]);

@@ -163,6 +163,49 @@ export const runInitCommand = async () => {
 				}[displayLocale]
 			);
 		}
+	} else {
+		const saveLocalePreference = await select({
+			message: {
+				[NoriLocale.EnglishBritish]:
+					".env file already exists. Do you want to update your preferred locale in it?",
+				[NoriLocale.Japanese]:
+					".envファイルは既に存在します。希望のロケールを更新しますか？"
+			}[displayLocale],
+			choices: [
+				{
+					name: {
+						[NoriLocale.EnglishBritish]: "Yes",
+						[NoriLocale.Japanese]: "はい"
+					}[displayLocale],
+					value: true
+				},
+				{
+					name: {
+						[NoriLocale.EnglishBritish]: "No",
+						[NoriLocale.Japanese]: "いいえ"
+					}[displayLocale],
+					value: false
+				}
+			],
+			default: false
+		});
+
+		if (saveLocalePreference) {
+			environment.persistEnv();
+			logger.success(
+				{
+					[NoriLocale.EnglishBritish]: "Preferred locale updated in .env file.",
+					[NoriLocale.Japanese]: ".envファイルの希望のロケールが更新されました。"
+				}[displayLocale]
+			);
+		} else {
+			logger.info(
+				{
+					[NoriLocale.EnglishBritish]: "Preferred locale not updated in .env file.",
+					[NoriLocale.Japanese]: ".envファイルの希望のロケールは更新されませんでした。"
+				}[displayLocale]
+			);
+		}
 	}
 
 	logger.success(

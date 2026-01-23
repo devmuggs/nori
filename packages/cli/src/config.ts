@@ -1,22 +1,23 @@
-import { NoriConfig, OutputMode, SupportedLanguage } from "@nori/core-types.js";
+import { NoriEnvironment } from "@nori";
+import { OutputMode, SupportedLanguage } from "@nori/environment/environment-types.js";
 
-export const noriConfig = new NoriConfig({
-	envFilePath: ".env",
+// export const noriConfig = new NoriEnvironment({
+// 	envFilePath: ".env",
 
-	input: {
-		target: "./nori.yaml"
-	},
+// 	input: {
+// 		target: "./nori.yaml"
+// 	},
 
-	output: {
-		[SupportedLanguage.TypeScript]: {
-			directory: "../../web-client/.nori",
-			mode: OutputMode.Monolithic
-		},
-		[SupportedLanguage.Python]: {
-			directory: "../../flask-server/.nori",
-			mode: OutputMode.Monolithic
-		}
-	}
-});
+// 	output: {
+// 		[SupportedLanguage.TypeScript]: {
+// 			directory: "../../web-client/.nori",
+// 			mode: OutputMode.Monolithic
+// 		},
+// 		[SupportedLanguage.Python]: {
+// 			directory: "../../flask-server/.nori",
+// 			mode: OutputMode.Monolithic
+// 		}
+// 	}
+// });
 
-export default noriConfig;
+// export default noriConfig;

@@ -88,6 +88,8 @@ export class NoriEnvironment implements NoriEnvironmentType {
 		}
 
 		const envContent = envLines.join("\n");
+
+		// append to end of file or create new file
 		fs.writeFileSync(this.envFilePath, envContent, { encoding: "utf-8" });
 	}
 }
