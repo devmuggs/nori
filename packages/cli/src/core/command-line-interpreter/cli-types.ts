@@ -1,5 +1,7 @@
-import { type EnumValue, Enum } from "@nori/utils/enum.js";
-import type { ArgSchema } from "./cli-schema.js";
+import { LogLevels, type EnumValue } from "@nori";
+import z from "zod";
+import { Enum } from "../utils/enum.js";
+import { argumentFlagValueSchema, fileString, type ArgSchema } from "./cli-schema.js";
 
 /** Shapes that CLI arguments can take */
 export type ArgumentShape = EnumValue<typeof ArgumentShape>;
@@ -14,9 +16,7 @@ export const [ArgumentShape] = Enum({
 	KeyEqualsValue: "key-equals-value"
 });
 
-/** Available argument options */
 export type ArgumentOption = EnumValue<typeof ArgumentOption>;
-
 /** Available argument options */
 export const [ArgumentOption, ArgumentOptionMetadata] = Enum({
 	/** Log level for the CLI output */
@@ -36,14 +36,13 @@ export const [ArgumentOption, ArgumentOptionMetadata] = Enum({
 	/** Initialize a new Nori project */
 	Init: "init",
 	/** Display help information */
-	Help: "help"
+	Help: "help",
+	/** Indicate env file path */
+	Env: "env"
 });
 
 /** Metadata for each ArgumentOption */
-export const ArgumentOptionConfig: Record<
-	EnumValue<typeof ArgumentOption>,
-	{ description: string }
-> = Object.freeze({
+export const ArgumentOptionConfig = ArgumentOptionMetadata.derive({
 	[ArgumentOption.LogLevel]: {
 		description: "Set the log level for CLI output (e.g., info, debug, warn, error)"
 	},
@@ -70,21 +69,24 @@ export const ArgumentOptionConfig: Record<
 	},
 	[ArgumentOption.Help]: {
 		description: "Display help information about CLI commands and options"
+	},
+	[ArgumentOption.Env]: {
+		description: "Specify the path to the environment file"
 	}
 });
 
 /** Available commands for the CLI */
 export type Command = EnumValue<typeof Command>;
-export const [Command] = Enum({
+export const [Command, CommandMeta] = Enum({
 	Generate: "generate"
 });
 
 /** Metadata for each Command */
-export const CommandConfig: Record<Command, { description: string }> = {
+export const CommandConfig = CommandMeta.derive({
 	[Command.Generate]: {
 		description: "Generate code based on the provided configuration"
 	}
-};
+});
 
 export type KeyValuePair<TValue> = Readonly<{
 	key: string;

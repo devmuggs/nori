@@ -1,9 +1,10 @@
-import { LogLevels } from "consola";
 import z from "zod";
 
-import { ArgumentOption, Command } from "./cli-types.js";
+import { LogLevels } from "consola";
+import { ArgumentOption, ArgumentOptionMetadata, Command } from "./cli-types.js";
 
-const fileString = z.string().refine(
+export const argumentFlagValueSchema = z.boolean().default(false);
+export const fileString = z.string().refine(
 	(value) => {
 		// regex to match valid file paths (basic)
 		const filePathRegex = /^(\/|\.\/|\.\.\/)?([\w-]+(\/|\\))*[\w-]+\.[\w]+$/;
@@ -16,20 +17,27 @@ export type ArgSchemaBaseType = z.infer<typeof ArgSchemaBase>;
 export const ArgSchemaBase = z
 	.object({
 		kind: z.literal("base"),
-		[ArgumentOption.LogLevel]: z.enum(LogLevels).default(LogLevels.info),
-		[ArgumentOption.Verbose]: z.boolean().default(false),
-		[ArgumentOption.Version]: z.boolean().default(false),
-		[ArgumentOption.ConfigPath]: fileString.optional(),
-		[ArgumentOption.Help]: z.boolean().default(false),
-		[ArgumentOption.Init]: z.boolean().default(false)
+		// using derive so we get ide errors if we forget to add a new ArgumentOption here
+		...ArgumentOptionMetadata.derive({
+			[ArgumentOption.LogLevel]: z.enum(LogLevels).default(LogLevels.info),
+			[ArgumentOption.Verbose]: argumentFlagValueSchema,
+			[ArgumentOption.Version]: argumentFlagValueSchema,
+			[ArgumentOption.ConfigPath]: fileString.optional(),
+			[ArgumentOption.OutputDir]: fileString.optional(),
+			[ArgumentOption.Force]: argumentFlagValueSchema,
+			[ArgumentOption.Watch]: argumentFlagValueSchema,
+			[ArgumentOption.Init]: argumentFlagValueSchema,
+			[ArgumentOption.Help]: argumentFlagValueSchema,
+			[ArgumentOption.Env]: fileString.optional()
+		})
 	})
 	.partial();
 
 export type GenerateArgs = z.infer<typeof GenerateArgSchema>;
 export const GenerateArgSchema = ArgSchemaBase.extend({
 	[ArgumentOption.OutputDir]: fileString.default("./nori-generated"),
-	[ArgumentOption.Force]: z.boolean().default(false),
-	[ArgumentOption.Watch]: z.boolean().default(false)
+	[ArgumentOption.Force]: argumentFlagValueSchema,
+	[ArgumentOption.Watch]: argumentFlagValueSchema
 })
 	.partial()
 	.extend({
