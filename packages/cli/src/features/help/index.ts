@@ -1,4 +1,4 @@
-import { ArgumentOptionConfig, CommandConfig } from "@nori/command-line-interpreter/cli-types.js";
+import { ArgumentOptionConfig, CommandConfig } from "@nori/command-line-interpreter/cli-schema.js";
 import { logger } from "../../core/logger.js";
 
 const buildHelpString = () => {

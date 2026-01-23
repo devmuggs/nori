@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
-import { environment } from "../environment-loader.js";
+import { environment } from "../index.js";
 import logger from "../logger.js";
 import { INoriCollection, IYamlSchema, type INoriEntry } from "./state-loader-schemas.js";
 import { NoriLocale } from "./state-loader-types.js";
@@ -71,7 +71,7 @@ export class NoriManager {
 	public static collections: Map<string, NoriCollection> = new Map();
 
 	public static async loadFromYaml(
-		filePath: string | undefined = environment.NoriYamlPath
+		filePath: string | undefined = environment.input.target
 	): Promise<void> {
 		if (!filePath) {
 			throw new Error("No YAML file path provided. Set NORI_YAML_PATH environment variable.");

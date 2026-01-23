@@ -1,15 +1,15 @@
 import logger from "../logger.js";
-import { ArgSchemaBase, ArgSchemas, type ArgSchema } from "./cli-schema.js";
-import { ArgumentShape, Command, CommandMeta } from "./cli-types.js";
+import { ArgSchemaBase, ArgSchemas, Command, CommandMeta, type ArgSchema } from "./cli-schema.js";
+import { ArgumentShape } from "./cli-types.js";
 import { ArgumentShapeEvaluators, evaluateArgumentShape } from "./cli-utils.js";
 
 /** Evaluates and processes Nori CLI arguments */
-export class CommandLineInterpreter implements CommandLineInterpreter {
-	private readonly argStrings: readonly string[];
-	private readonly _command: Command | undefined;
-	private _args: ArgSchema | undefined;
+export default class CommandLineInterpreter implements CommandLineInterpreter {
+	public static argStrings: readonly string[];
+	public static command: Command | undefined;
+	public static args: ArgSchema;
 
-	constructor() {
+	public static start = () => {
 		const argv = process.argv.slice(2);
 
 		if (argv.length === 0) {
@@ -22,22 +22,22 @@ export class CommandLineInterpreter implements CommandLineInterpreter {
 		const isValidCommand = CommandMeta.evaluateIsValue(commandString);
 		logger.trace(`Is valid command: ${isValidCommand}`);
 
-		this._command = isValidCommand ? (commandString as Command) : undefined;
-		this.argStrings = Object.freeze(isValidCommand ? argv.slice(1) : argv);
-	}
+		CommandLineInterpreter.command = isValidCommand ? (commandString as Command) : undefined;
+		CommandLineInterpreter.argStrings = Object.freeze(isValidCommand ? argv.slice(1) : argv);
+	};
 
 	public get command(): Command | undefined {
-		return this._command;
+		return CommandLineInterpreter.command;
 	}
 
 	/** Interpret CLI arguments and apply to _args */
 	public get args(): ArgSchema {
-		if (this._args) return this._args;
+		if (CommandLineInterpreter.args) return CommandLineInterpreter.args;
 
 		const kvPairs: Record<string, string | boolean> = {};
 
-		for (let i = 0; i < this.argStrings.length; i++) {
-			const currentArg = this.argStrings[i];
+		for (let i = 0; i < CommandLineInterpreter.argStrings.length; i++) {
+			const currentArg = CommandLineInterpreter.argStrings[i];
 			if (!currentArg) break;
 
 			const shape = evaluateArgumentShape(currentArg);
@@ -51,12 +51,14 @@ export class CommandLineInterpreter implements CommandLineInterpreter {
 			}
 		}
 
-		const schemaToUse = this._command ? ArgSchemas[this._command] : ArgSchemaBase;
+		const schemaToUse = CommandLineInterpreter.command
+			? ArgSchemas[CommandLineInterpreter.command as keyof typeof ArgSchemas]
+			: ArgSchemaBase;
 
 		try {
-			this._args = schemaToUse.parse({
+			CommandLineInterpreter.args = schemaToUse.parse({
 				...kvPairs,
-				kind: this._command ? this._command : "base"
+				kind: CommandLineInterpreter.command ? CommandLineInterpreter.command : "base"
 			});
 		} catch (error) {
 			logger.error("Error parsing CLI arguments:");
@@ -64,9 +66,6 @@ export class CommandLineInterpreter implements CommandLineInterpreter {
 			throw error;
 		}
 
-		return this._args;
+		return CommandLineInterpreter.args;
 	}
 }
-
-const cli = new CommandLineInterpreter();
-export default cli;

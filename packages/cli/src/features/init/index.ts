@@ -1,9 +1,10 @@
-import { checkbox, input, select, Separator } from "@inquirer/prompts";
-import { logger, NoriCollection, NoriEntry } from "@nori";
-import { environment } from "../../core/environment-loader.js";
+import { input, select } from "@inquirer/prompts";
+
+import { environment } from "../../core/index.js";
+import { logger } from "../../core/logger.js";
 import { NoriLocale, NoriLocaleMeta } from "../../core/state-loader/state-loader-types.js";
 
-type GenerateForm = {
+type InitForm = {
 	preferredLocale: NoriLocale;
 	authorName: string;
 	project: {
@@ -12,23 +13,24 @@ type GenerateForm = {
 	};
 };
 
-export const runGenerateCommand = async () => {
+export const runInitCommand = async () => {
 	let displayLocale: NoriLocale = NoriLocale.EnglishBritish;
 
 	// Detect system locale if no preferred locale is set
-	if (!environment.PreferredLocale) {
+	if (!environment.preferences.preferredLocale) {
 		const systemLocale = Intl.DateTimeFormat().resolvedOptions().locale;
-		logger.debug(`Detected system locale: ${systemLocale}`);
+		logger.info(`Detected system locale: ${systemLocale}`);
 
 		if (systemLocale.startsWith("ja")) {
-			environment.PreferredLocale = NoriLocale.Japanese;
+			environment.preferences.preferredLocale = NoriLocale.Japanese;
 			logger.debug("Setting preferred locale to Japanese based on system locale.");
 		} else {
-			environment.PreferredLocale = NoriLocale.EnglishBritish;
+			environment.preferences.preferredLocale = NoriLocale.EnglishBritish;
 			logger.debug("Setting preferred locale to English (British) based on system locale.");
 		}
 
-		if (environment.PreferredLocale) displayLocale = environment.PreferredLocale;
+		if (environment.preferences.preferredLocale)
+			displayLocale = environment.preferences.preferredLocale;
 	}
 
 	// Prompt for locale confirmation
@@ -73,15 +75,15 @@ export const runGenerateCommand = async () => {
 		});
 
 		if (NoriLocaleMeta.evaluateIsValue(preferredLocale)) {
-			environment.PreferredLocale = preferredLocale;
-			displayLocale = environment.PreferredLocale;
+			environment.preferences.preferredLocale = preferredLocale;
+			displayLocale = environment.preferences.preferredLocale;
 		} else {
 			throw new Error("Invalid locale selected.");
 		}
 	}
 
 	// Prompt for other project details
-	const formResponses: GenerateForm = {
+	const formResponses: InitForm = {
 		preferredLocale: displayLocale,
 		authorName: await input({
 			message: {
@@ -111,11 +113,62 @@ export const runGenerateCommand = async () => {
 		}
 	};
 
-	logger.log("Generating project with the following details:");
-	logger.log(`Locale: ${formResponses.preferredLocale}`);
-	logger.log(`Author: ${formResponses.authorName}`);
-	logger.log(`Project Name: ${formResponses.project.name}`);
-	logger.log(`Project Description: ${formResponses.project.description}`);
+	if (!environment.isEnvFileFound) {
+		logger.info(
+			{
+				[NoriLocale.EnglishBritish]:
+					"No .env file found in the current directory. Creating one with your preferences...",
+				[NoriLocale.Japanese]:
+					"現在のディレクトリに.envファイルが見つかりません。あなたの設定で作成します..."
+			}[displayLocale]
+		);
 
-	// Here you would add the logic to actually generate the project files based on the responses
+		const performCreation = await select({
+			message: {
+				[NoriLocale.EnglishBritish]: "Create .env file now?",
+				[NoriLocale.Japanese]: ".envファイルを今すぐ作成しますか？"
+			}[displayLocale],
+			choices: [
+				{
+					name: {
+						[NoriLocale.EnglishBritish]: "Yes",
+						[NoriLocale.Japanese]: "はい"
+					}[displayLocale],
+					value: true
+				},
+				{
+					name: {
+						[NoriLocale.EnglishBritish]: "No",
+						[NoriLocale.Japanese]: "いいえ"
+					}[displayLocale],
+					value: false
+				}
+			],
+			default: true
+		});
+
+		if (performCreation) {
+			environment.persistEnv();
+			logger.success(
+				{
+					[NoriLocale.EnglishBritish]: ".env file created successfully.",
+					[NoriLocale.Japanese]: ".envファイルが正常に作成されました。"
+				}[displayLocale]
+			);
+		} else {
+			logger.warn(
+				{
+					[NoriLocale.EnglishBritish]: "Skipped .env file creation.",
+					[NoriLocale.Japanese]: ".envファイルの作成をスキップしました。"
+				}[displayLocale]
+			);
+		}
+	}
+
+	logger.success(
+		{
+			[NoriLocale.EnglishBritish]: "Initialization complete! You can now start using Nori.",
+			[NoriLocale.Japanese]: "初期化が完了しました！これでNoriを使用開始できます。"
+		}[displayLocale]
+	);
 };
