@@ -1,5 +1,7 @@
 import dotenv from "dotenv";
 import path from "path";
+import { NoriLocale, NoriLocaleMeta } from "./state-loader/state-loader-types.js";
+const fs = await import("fs");
 
 const envLoader = (
 	key: string,
@@ -20,17 +22,27 @@ const envLoader = (
 	return value;
 };
 
-export let environment = {
-	NoriYamlPath: envLoader("NORI_YAML_PATH", { defaultValue: "" }),
-	PreferredLocale: envLoader("NORI_PREFERRED_LOCALE")
+export let environment: {
+	NoriYamlPath: string;
+	PreferredLocale: NoriLocale | undefined;
+} = {
+	NoriYamlPath: "",
+	PreferredLocale: undefined
 };
 
-export const loadEnvironment = (pathToEnvFile: string) => {
-	const resolvedPath = path.resolve(pathToEnvFile);
-	dotenv.config({ path: resolvedPath });
+// nori env path could be loaded either via CLI arg of --env or via default .env file in cwd
 
-	environment = {
+export const loadEnvironment = (envPath?: string) => {
+	let resolvedPath = envPath ? path.resolve(envPath) : path.resolve(process.cwd(), ".env");
+
+	dotenv.config(fs.existsSync(resolvedPath) ? { path: resolvedPath } : undefined);
+
+	const preferredLocaleString = envLoader("NORI_PREFERRED_LOCALE");
+
+	return {
 		NoriYamlPath: envLoader("NORI_YAML_PATH", { defaultValue: "" }),
-		PreferredLocale: envLoader("NORI_PREFERRED_LOCALE", {})
+		PreferredLocale: NoriLocaleMeta.evaluateIsValue(preferredLocaleString)
+			? (preferredLocaleString as NoriLocale)
+			: undefined
 	};
 };
