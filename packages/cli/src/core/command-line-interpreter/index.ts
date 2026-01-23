@@ -1,10 +1,10 @@
 import logger from "../logger.js";
 import { ArgSchemaBase, ArgSchemas, type ArgSchema } from "./cli-schema.js";
-import { ArgumentShape, Command } from "./cli-types.js";
+import { ArgumentShape, Command, CommandMeta } from "./cli-types.js";
 import { ArgumentShapeEvaluators, evaluateArgumentShape } from "./cli-utils.js";
 
 /** Evaluates and processes Nori CLI arguments */
-export default class CommandLineInterpreter implements CommandLineInterpreter {
+export class CommandLineInterpreter implements CommandLineInterpreter {
 	private readonly argStrings: readonly string[];
 	private readonly _command: Command | undefined;
 	private _args: ArgSchema | undefined;
@@ -17,7 +17,10 @@ export default class CommandLineInterpreter implements CommandLineInterpreter {
 		}
 
 		const commandString = argv[0] ?? "";
-		const isValidCommand = commandString in Command;
+		logger.trace(`Interpreting command: ${commandString}`);
+
+		const isValidCommand = CommandMeta.evaluateIsValue(commandString);
+		logger.trace(`Is valid command: ${isValidCommand}`);
 
 		this._command = isValidCommand ? (commandString as Command) : undefined;
 		this.argStrings = Object.freeze(isValidCommand ? argv.slice(1) : argv);
@@ -51,7 +54,10 @@ export default class CommandLineInterpreter implements CommandLineInterpreter {
 		const schemaToUse = this._command ? ArgSchemas[this._command] : ArgSchemaBase;
 
 		try {
-			this._args = schemaToUse.parse(kvPairs);
+			this._args = schemaToUse.parse({
+				...kvPairs,
+				kind: this._command ? this._command : "base"
+			});
 		} catch (error) {
 			logger.error("Error parsing CLI arguments:");
 			logger.error(error);
@@ -61,3 +67,6 @@ export default class CommandLineInterpreter implements CommandLineInterpreter {
 		return this._args;
 	}
 }
+
+const cli = new CommandLineInterpreter();
+export default cli;
