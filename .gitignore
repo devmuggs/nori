@@ -36,17 +36,8 @@ coverage/
 *~
 
 # Environment files
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# nested Environment files
-**/.env.local
-**/.env.development.local
-**/.env.test.local
-**/.env.production.local
-**/.env.*
+.env*
+**/.env*
 
 # TypeScript
 .tsbuildinfo
@@ -55,3 +46,4 @@ coverage/
 .tmp/
 .cache/
 
+packages/cli/.env
