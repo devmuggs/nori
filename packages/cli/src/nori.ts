@@ -1,22 +1,25 @@
 import { ArgumentOption, Command } from "@nori/command-line-interpreter/cli-schema.js";
 import CommandLineInterpreter from "@nori/command-line-interpreter/index.js";
 import logger from "@nori/logger.js";
-import { environment } from "./core/index.js";
+
+import NoriEnvironment from "@nori/environment/environment-loader.js";
 import { runHelpCommand } from "./features/index.js";
 import { runInitCommand } from "./features/init/index.js";
 
 const main = async () => {
-	CommandLineInterpreter.start();
+	const cli = new CommandLineInterpreter();
+	const environment = new NoriEnvironment();
 
-	const args = CommandLineInterpreter.args;
-	const command = CommandLineInterpreter.command;
+	const args = cli.args;
+	const command = cli.command;
 
 	logger.debug("Parsed Command Line Arguments:", args);
 	logger.debug("Parsed Command:", command);
 
 	if (args[ArgumentOption.Help]) return runHelpCommand();
+
 	if (args[ArgumentOption.Env]) environment.loadEnv(args[ArgumentOption.Env]);
-	if (command === Command.Generate) return runInitCommand();
+	if (args[ArgumentOption.Init]) return runInitCommand(environment);
 
 	logger.log("No command provided. Use --help to see available commands.");
 	process.exit(0);

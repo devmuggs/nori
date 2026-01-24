@@ -1,6 +1,6 @@
 import { input, select } from "@inquirer/prompts";
 
-import { environment } from "../../core/index.js";
+import type NoriEnvironment from "@nori/environment/environment-loader.js";
 import { logger } from "../../core/logger.js";
 import { NoriLocale, NoriLocaleMeta } from "../../core/state-loader/state-loader-types.js";
 
@@ -13,7 +13,7 @@ type InitForm = {
 	};
 };
 
-export const runInitCommand = async () => {
+export const runInitCommand = async (environment: NoriEnvironment) => {
 	let displayLocale: NoriLocale = NoriLocale.EnglishBritish;
 
 	// Detect system locale if no preferred locale is set

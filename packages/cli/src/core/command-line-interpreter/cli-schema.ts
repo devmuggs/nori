@@ -1,7 +1,7 @@
 import z from "zod";
 
 import { LogLevels } from "consola";
-import { Enum } from "../utils/enum.js";
+import { Enum, type EnumValue } from "../utils/enum.js";
 
 export type ArgumentOption = EnumValue<typeof ArgumentOption>;
 /** Available argument options */
@@ -65,13 +65,17 @@ export const ArgumentOptionConfig = ArgumentOptionMetadata.derive({
 /** Available commands for the CLI */
 export type Command = EnumValue<typeof Command>;
 export const [Command, CommandMeta] = Enum({
-	Generate: "generate"
+	Generate: "generate",
+	Base: "base"
 });
 
 /** Metadata for each Command */
 export const CommandConfig = CommandMeta.derive({
 	[Command.Generate]: {
 		description: "Generate code based on the provided configuration"
+	},
+	[Command.Base]: {
+		description: "Base command with general options"
 	}
 });
 
@@ -121,10 +125,10 @@ export const GenerateArgSchema = ArgSchemaBase.extend({
 		kind: z.literal(Command.Generate)
 	});
 
-export type ArgSchemasType = typeof ArgSchemas;
-export const ArgSchemas = CommandMeta.derive({
+export type ArgSchema = z.infer<typeof ArgSchema>;
+export const ArgSchema = z.union([GenerateArgSchema, ArgSchemaBase]);
+
+export const CommandArgSchemaMap = CommandMeta.derive({
+	base: ArgSchemaBase,
 	[Command.Generate]: GenerateArgSchema
 });
-
-export type ArgSchema = z.infer<typeof ArgSchema>;
-export const ArgSchema = z.discriminatedUnion("kind", [GenerateArgSchema, ArgSchemaBase]);

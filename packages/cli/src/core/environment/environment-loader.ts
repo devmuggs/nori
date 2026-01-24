@@ -12,7 +12,7 @@ import {
 const fs = await import("fs");
 
 /** Manages Nori environment configuration and persistence */
-export class NoriEnvironment implements NoriEnvironmentType {
+export default class NoriEnvironment implements NoriEnvironmentType {
 	public envFilePath: string;
 
 	public input: {
@@ -93,6 +93,3 @@ export class NoriEnvironment implements NoriEnvironmentType {
 		fs.writeFileSync(this.envFilePath, envContent, { encoding: "utf-8" });
 	}
 }
-
-export const environment = new NoriEnvironment();
-export default environment;
