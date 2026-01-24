@@ -18,6 +18,7 @@ export const [SupportedLanguage] = Enum({
 	Python: "python"
 });
 
+export type EnvironmentVariable = EnumValue<typeof EnvironmentVariable>;
 export const [EnvironmentVariable] = Enum({
 	EnvFilePath: "NORI_ENV_FILE_PATH",
 	InputTarget: "NORI_INPUT_TARGET",

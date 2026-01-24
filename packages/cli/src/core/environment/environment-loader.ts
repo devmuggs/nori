@@ -1,3 +1,4 @@
+import { logger } from "@nori";
 import { ArgumentOption } from "@nori/command-line-interpreter/cli-schema.js";
 import type { EnumValue } from "@nori/utils/enum.js";
 import dotenv from "dotenv";
@@ -55,10 +56,51 @@ export default class NoriEnvironment implements NoriEnvironmentType {
 		this.isEnvFileFound = fs.existsSync(this.envFilePath);
 	}
 
+	public loadEnvValue = (
+		key: EnvironmentVariable,
+		options: Partial<{
+			defaultValue: string;
+			isSecret: boolean;
+		}> = {}
+	): string => {
+		let value = process.env[key];
+
+		if (value === undefined) {
+			if (options.defaultValue !== undefined) {
+				value = options.defaultValue;
+			} else {
+				throw new Error(`Environment variable ${key} is not set.`);
+			}
+		}
+
+		if (!options.isSecret) {
+			logger.debug(`Loaded environment variable ${key}: ${value}`);
+		} else {
+			logger.debug(`Loaded environment variable ${key}: ******`);
+		}
+		return value;
+	};
+
 	public loadEnv(envPath?: string): NoriEnvironmentType {
 		dotenv.config(envPath ? { path: envPath } : undefined);
 
-		const { success, data: config, error } = NoriEnvironmentSchema.safeParse(process.env);
+		const {
+			success,
+			data: config,
+			error
+		} = NoriEnvironmentSchema.safeParse({
+			envFilePath: this.loadEnvValue(EnvironmentVariable.EnvFilePath, {
+				defaultValue: ".env"
+			}),
+			preferences: {
+				preferredLocale: this.loadEnvValue(EnvironmentVariable.PreferredLocale, {
+					defaultValue: NoriLocale.EnglishBritish
+				})
+			},
+			input: {
+				target: this.loadEnvValue(EnvironmentVariable.InputTarget)
+			}
+		});
 		if (!success) {
 			throw new Error(`Failed to load environment configuration: ${error.message}`);
 		}

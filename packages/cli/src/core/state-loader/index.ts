@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
-import { environment } from "../index.js";
+
+import type NoriEnvironment from "@nori/environment/environment-loader.js";
 import logger from "../logger.js";
 import { INoriCollection, IYamlSchema, type INoriEntry } from "./state-loader-schemas.js";
 import { NoriLocale } from "./state-loader-types.js";
@@ -68,10 +69,16 @@ export class NoriCollection {
 }
 
 export class NoriManager {
-	public static collections: Map<string, NoriCollection> = new Map();
+	private environment: NoriEnvironment;
 
-	public static async loadFromYaml(
-		filePath: string | undefined = environment.input.target
+	constructor(environment: NoriEnvironment) {
+		this.environment = environment;
+	}
+
+	public collections: Map<string, NoriCollection> = new Map();
+
+	public async loadFromYaml(
+		filePath: string | undefined = this.environment.input.target
 	): Promise<void> {
 		if (!filePath) {
 			throw new Error("No YAML file path provided. Set NORI_YAML_PATH environment variable.");
@@ -96,15 +103,15 @@ export class NoriManager {
 		}
 	}
 
-	public static toString(): string {
+	public toString(): string {
 		return `NoriManager(collections=${JSON.stringify(Array.from(this.collections.entries()))})`;
 	}
 
-	public static getCollectionById(id: string): NoriCollection | undefined {
+	public getCollectionById(id: string): NoriCollection | undefined {
 		return this.collections.get(id);
 	}
 
-	public static debugPrint() {
+	public debugPrint() {
 		const collectionStack: Array<NoriCollection> = [];
 
 		const outputStrings: string[] = [`NoriManager State:`];

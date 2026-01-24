@@ -1,7 +1,9 @@
+import { NoriLocale } from "@nori";
 import { ArgumentOptionConfig, CommandConfig } from "@nori/command-line-interpreter/cli-schema.js";
+import type NoriEnvironment from "@nori/environment/environment-loader.js";
 import { logger } from "../../core/logger.js";
 
-const buildHelpString = () => {
+const buildHelpString = (locale: NoriLocale) => {
 	// keep track for formatting
 	let longestCommandLength = 0;
 	let longestOptionLength = 0;
@@ -11,15 +13,16 @@ const buildHelpString = () => {
 
 	const commandLines = Object.entries(CommandConfig).map(([command, config]) => {
 		const padding = " ".repeat(longestCommandLength - command.length + 4);
-		return `  ${command}${padding}${config.description}`;
+		return `  ${command}${padding}${config.description[locale]}`;
 	});
 
 	const optionLines = Object.entries(ArgumentOptionConfig).map(([argName, config]) => {
 		const padding = " ".repeat(longestOptionLength - argName.length + 4);
-		return `  --${argName}${padding}${config.description}`;
+		return `  --${argName}${padding}${config.description[locale]}`;
 	});
 
-	return `Available Commands and Options:
+	return {
+		[NoriLocale.EnglishBritish]: `Available Commands and Options:
 Usage: nori [command] [options]
 
 Commands:
@@ -27,9 +30,21 @@ ${commandLines.join("\n")}
 
 Options:
 ${optionLines.join("\n")}
-`;
+`,
+		[NoriLocale.Japanese]: `利用可能なコマンドとオプション：
+使用法: nori [コマンド] [オプション]
+
+コマンド:
+${commandLines.join("\n")}
+
+オプション:
+${optionLines.join("\n")}
+`
+	}[locale];
 };
 
-export const runHelpCommand = (): void => {
-	logger.log(buildHelpString());
+export const runHelpCommand = (environment: NoriEnvironment): void => {
+	logger.log(
+		buildHelpString(environment.preferences.preferredLocale ?? NoriLocale.EnglishBritish)
+	);
 };
