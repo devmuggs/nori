@@ -1,9 +1,55 @@
-export type RecordKey = string;
 export type RecordEnumValue = string | number | symbol;
+export type EnumLike<T extends RecordEnumValue> = {
+	[key: string]: T;
+};
 
-export type EnumLike<T extends RecordEnumValue> = { [key in T]: T };
 export type EnumValue<T extends EnumLike<RecordEnumValue>> = T[keyof T];
 export type EnumKey<T extends EnumLike<RecordEnumValue>> = keyof T;
+
+export type EnumKeyFromValue<T extends EnumLike<RecordEnumValue>, V extends EnumValue<T>> = {
+	[K in EnumKey<T>]: T[K] extends V ? K : never;
+}[EnumKey<T>];
+
+export type EnumPick<T extends EnumLike<RecordEnumValue>, K extends readonly EnumValue<T>[]> = {
+	[K2 in EnumKey<T> as T[K2] extends K[number] ? K2 : never]: T[K2];
+};
+
+export type EnumOmit<T extends EnumLike<RecordEnumValue>, K extends readonly EnumValue<T>[]> = {
+	[K2 in EnumKey<T> as T[K2] extends K[number] ? never : K2]: T[K2];
+};
+
+const _pick = <const T extends EnumLike<RecordEnumValue>, const K extends readonly EnumValue<T>[]>(
+	enumObj: T,
+	keys: K
+): EnumPick<T, K> => {
+	const result = {} as EnumPick<T, K>;
+	for (const key in enumObj) {
+		if (keys.includes(enumObj[key] as EnumValue<T>)) {
+			(result as Record<string, unknown>)[key] = enumObj[key];
+		}
+	}
+	return result;
+};
+
+const _omit = <const T extends EnumLike<RecordEnumValue>, const K extends readonly EnumValue<T>[]>(
+	enumObj: T,
+	values: K
+): EnumOmit<T, K> => {
+	const result = {} as EnumOmit<T, K>;
+	const valueSet = new Set(values);
+
+	for (const key in enumObj) {
+		if (!valueSet.has(enumObj[key] as EnumValue<T>)) {
+			(result as Record<string, unknown>)[key] = enumObj[key];
+		}
+	}
+
+	if (Object.keys(result).length + values.length !== Object.keys(enumObj).length) {
+		throw new Error("Some values to omit were not found in the enum");
+	}
+
+	return result;
+};
 
 const _derive = <
 	const T extends EnumLike<RecordEnumValue>,
@@ -12,7 +58,7 @@ const _derive = <
 	enumObj: T,
 	record: U
 ) => {
-	const result: Partial<Record<EnumValue<T>, unknown>> = {};
+	const result: Record<EnumValue<T>, unknown> = {} as Record<EnumValue<T>, unknown>;
 	for (const key of Object.values(enumObj) as EnumValue<T>[]) {
 		if (key in record) {
 			result[key] = record[key];
@@ -62,22 +108,12 @@ export const Enum = <const T extends EnumLike<RecordEnumValue>>(obj: T) => {
 		},
 
 		pick: <const K extends EnumValue<T>[]>(values: K) => {
-			const pickSet = new Set(values);
-
-			// Find the keys for the picked values
-			const pickedEntries = Object.entries(enumObj).filter(([, value]) =>
-				pickSet.has(value as EnumValue<T>)
-			) as [EnumKey<T>, EnumValue<T>][]; // type assertion for TS
-
-			// Build the picked enum object
-			const picked = Object.fromEntries(pickedEntries) as {
-				[K2 in EnumKey<T> as T[K2] extends K[number] ? K2 : never]: T[K2];
-			};
+			const picked = _pick(enumObj, values);
 
 			return Object.freeze({
 				...picked,
-				derive: <const K3 extends Partial<Record<EnumValue<typeof picked>, unknown>>>(
-					derivedRecord: K3
+				derive: <const U extends Readonly<Record<EnumValue<typeof picked>, unknown>>>(
+					derivedRecord: U
 				) => {
 					return _derive(picked, derivedRecord);
 				}
@@ -85,22 +121,12 @@ export const Enum = <const T extends EnumLike<RecordEnumValue>>(obj: T) => {
 		},
 
 		omit: <const K extends EnumValue<T>[]>(values: K) => {
-			const omitSet = new Set(values);
-
-			// Find the keys for the omitted values
-			const omittedEntries = Object.entries(enumObj).filter(
-				([, value]) => !omitSet.has(value as EnumValue<T>)
-			) as [EnumKey<T>, EnumValue<T>][]; // type assertion for TS
-
-			// Build the omitted enum object
-			const omitted = Object.fromEntries(omittedEntries) as {
-				[K2 in EnumKey<T> as T[K2] extends K[number] ? never : K2]: T[K2];
-			};
+			const omitted = _omit(enumObj, values);
 
 			return Object.freeze({
 				...omitted,
-				derive: <const K3 extends Partial<Record<EnumValue<typeof omitted>, unknown>>>(
-					derivedRecord: K3
+				derive: <const U extends Readonly<Record<EnumValue<typeof omitted>, unknown>>>(
+					derivedRecord: U
 				) => {
 					return _derive(omitted, derivedRecord);
 				}
@@ -110,9 +136,3 @@ export const Enum = <const T extends EnumLike<RecordEnumValue>>(obj: T) => {
 
 	return [enumObj, metadata] as const;
 };
-
-const [colours] = Enum({
-	Red: "red",
-	Green: "green",
-	Blue: "blue"
-});
