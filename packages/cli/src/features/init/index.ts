@@ -1,8 +1,12 @@
-import { input, select } from "@inquirer/prompts";
+import { select } from "@inquirer/prompts";
 
-import type NoriEnvironment from "@nori/environment/environment-loader.js";
 import { logger } from "../../core/logger.js";
-import { NoriLocale, NoriLocaleMeta } from "../../core/state-loader/state-loader-types.js";
+import {
+	createNoriI18nCollection,
+	NoriLocale,
+	NoriLocaleMeta
+} from "../../core/state-loader/state-loader-types.js";
+import type { CommandHandler } from "../index.js";
 
 type InitForm = {
 	preferredLocale: NoriLocale;
@@ -13,7 +17,7 @@ type InitForm = {
 	};
 };
 
-export const runInitCommand = async (environment: NoriEnvironment) => {
+export const runInitCommand: CommandHandler = async ({ environment, cli: { input } }) => {
 	let displayLocale: NoriLocale = NoriLocale.EnglishBritish;
 
 	// Detect system locale if no preferred locale is set
@@ -34,24 +38,24 @@ export const runInitCommand = async (environment: NoriEnvironment) => {
 	}
 
 	// Prompt for locale confirmation
-	const isPreferredLocale = await select({
-		message: {
+	const isPreferredLocale = await input.select({
+		message: createNoriI18nCollection({
 			[NoriLocale.EnglishBritish]: "Is this your preferred locale?",
 			[NoriLocale.Japanese]: "これはあなたの希望のロケールですか？"
-		}[displayLocale],
+		}),
 		choices: [
 			{
-				name: {
+				label: createNoriI18nCollection({
 					[NoriLocale.EnglishBritish]: "Yes",
 					[NoriLocale.Japanese]: "はい"
-				}[displayLocale],
+				}),
 				value: true
 			},
 			{
-				name: {
+				label: createNoriI18nCollection({
 					[NoriLocale.EnglishBritish]: "No",
 					[NoriLocale.Japanese]: "いいえ"
-				}[displayLocale],
+				}),
 				value: false
 			}
 		],
@@ -59,14 +63,26 @@ export const runInitCommand = async (environment: NoriEnvironment) => {
 	});
 
 	if (!isPreferredLocale) {
-		const preferredLocale = await select({
-			message: {
+		const preferredLocale = await input.select({
+			message: createNoriI18nCollection({
 				[NoriLocale.EnglishBritish]: "Preferred Locale:",
 				[NoriLocale.Japanese]: "希望のロケール："
-			}[displayLocale],
+			}),
 			choices: [
-				{ name: "English (British)", value: NoriLocale.EnglishBritish },
-				{ name: "Japanese (日本語)", value: NoriLocale.Japanese }
+				{
+					label: createNoriI18nCollection({
+						[NoriLocale.EnglishBritish]: "English (British)",
+						[NoriLocale.Japanese]: "英語（英国）"
+					}),
+					value: NoriLocale.EnglishBritish
+				},
+				{
+					label: createNoriI18nCollection({
+						[NoriLocale.EnglishBritish]: "Japanese (日本語)",
+						[NoriLocale.Japanese]: "日本語（日本語）"
+					}),
+					value: NoriLocale.Japanese
+				}
 			],
 			default:
 				displayLocale === NoriLocale.EnglishBritish
@@ -85,30 +101,30 @@ export const runInitCommand = async (environment: NoriEnvironment) => {
 	// Prompt for other project details
 	const formResponses: InitForm = {
 		preferredLocale: displayLocale,
-		authorName: await input({
-			message: {
+		authorName: await input.text({
+			prompt: createNoriI18nCollection({
 				[NoriLocale.EnglishBritish]: "Author Name:",
 				[NoriLocale.Japanese]: "著者名："
-			}[displayLocale],
+			}),
 			default: process.env.USER || process.env.USERNAME || ""
 		}),
 		project: {
-			name: await input({
-				message: {
+			name: await input.text({
+				prompt: createNoriI18nCollection({
 					[NoriLocale.EnglishBritish]: "Project Name:",
 					[NoriLocale.Japanese]: "プロジェクト名："
-				}[displayLocale],
+				}),
 				default: process.cwd().split("/").pop() || "nori-project"
 			}),
-			description: await input({
-				message: {
+			description: await input.text({
+				prompt: createNoriI18nCollection({
 					[NoriLocale.EnglishBritish]: "Project Description:",
 					[NoriLocale.Japanese]: "プロジェクトの説明："
-				}[displayLocale],
-				default: {
+				}),
+				default: createNoriI18nCollection({
 					[NoriLocale.EnglishBritish]: "I18n by Nori ≽^•⩊•^≼",
 					[NoriLocale.Japanese]: "Noriによる国際化 ≽^•⩊•^≼"
-				}[displayLocale]
+				})
 			})
 		}
 	};

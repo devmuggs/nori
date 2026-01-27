@@ -1,3 +1,4 @@
+import type { InputManager } from "@nori/input-manager/index.js";
 import logger from "../logger.js";
 import {
 	ArgSchema,
@@ -10,14 +11,17 @@ import { ArgumentShape } from "./cli-types.js";
 import { ArgumentShapeEvaluators, evaluateArgumentShape } from "./cli-utils.js";
 
 /** Evaluates and processes Nori CLI arguments */
-export default class CommandLineInterpreter {
+export default class CommandLineInterface {
+	public input: InputManager;
 	public argStrings: readonly string[];
 	private _command: Command =
 		process.argv.length > 2 ? (process.argv[2] as Command) : Command.Base;
 
 	private _args: ArgSchema | null = null;
 
-	constructor() {
+	constructor(input: InputManager) {
+		this.input = input;
+
 		const argv = process.argv.slice(2);
 
 		if (argv.length === 0) {

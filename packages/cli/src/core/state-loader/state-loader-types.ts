@@ -43,18 +43,22 @@ export interface NoriI18nCollection extends Readonly<Partial<Record<NoriLocale, 
 	};
 }
 
-export const createNoriI18nCollection =
-	<TProps extends Record<string, unknown> | never = never>(
-		builder: (props: TProps) => Omit<NoriI18nCollection, "_meta">
-	) =>
-	(props: TProps): NoriI18nCollection => {
-		return Object.freeze({
-			...builder(props),
-			_meta: {
-				kind: "noriI18nCollection"
-			} as const
-		} as const) as NoriI18nCollection;
-	};
+export const createNoriI18nCollection = <
+	const TProps extends Record<string, unknown> | never = never
+>(
+	builder:
+		| Omit<NoriI18nCollection, "_meta">
+		| ((props: TProps) => Omit<NoriI18nCollection, "_meta">)
+): TProps extends never ? NoriI18nCollection : (props: TProps) => NoriI18nCollection =>
+	typeof builder === "function"
+		? (((props: TProps) => ({
+				...builder(props),
+				_meta: { kind: "noriI18nCollection" }
+			})) as TProps extends never ? never : (props: TProps) => NoriI18nCollection)
+		: ({
+				...builder,
+				_meta: { kind: "noriI18nCollection" }
+			} as TProps extends never ? NoriI18nCollection : never);
 
 export const isNoriI18nCollection = (obj: unknown): obj is NoriI18nCollection => {
 	if (typeof obj !== "object" || obj === null) return false;

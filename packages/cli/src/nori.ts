@@ -1,16 +1,18 @@
 import { ArgumentOption, Command } from "@nori/command-line-interpreter/cli-schema.js";
-import CommandLineInterpreter from "@nori/command-line-interpreter/index.js";
+import CommandLineInterface from "@nori/command-line-interpreter/index.js";
 import logger from "@nori/logger.js";
 
 import { select } from "@inquirer/prompts";
 import NoriEnvironment from "@nori/environment/environment-loader.js";
+import { InputManager } from "@nori/input-manager/index.js";
 import { NoriLocale, NoriLocaleMeta } from "@nori/state-loader/index.js";
 import { runHelpCommand } from "./features/index.js";
 import { runInitCommand } from "./features/init/index.js";
 
 const main = async () => {
-	const cli = new CommandLineInterpreter();
 	const environment = new NoriEnvironment();
+	const input = new InputManager(environment);
+	const cli = new CommandLineInterface(input);
 
 	const args = cli.args;
 	const command = cli.command;
@@ -18,9 +20,10 @@ const main = async () => {
 	logger.debug("Parsed Command Line Arguments:", args);
 	logger.debug("Parsed Command:", command);
 
-	if (args[ArgumentOption.Help] || command === Command.Base) return runHelpCommand(environment);
+	if (args[ArgumentOption.Help] || command === Command.Base)
+		return runHelpCommand({ environment, cli });
 	if (args[ArgumentOption.Env]) environment.loadEnv(args[ArgumentOption.Env]);
-	if (args[ArgumentOption.Init]) return runInitCommand(environment);
+	if (args[ArgumentOption.Init]) return runInitCommand({ environment, cli });
 
 	if (args.kind === Command.Config) {
 		if (args[ArgumentOption.SetLocale] !== undefined) {

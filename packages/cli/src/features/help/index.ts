@@ -1,7 +1,7 @@
 import { NoriLocale } from "@nori";
 import { ArgumentOptionConfig, CommandConfig } from "@nori/command-line-interpreter/cli-schema.js";
-import type NoriEnvironment from "@nori/environment/environment-loader.js";
 import { logger } from "../../core/logger.js";
+import type { CommandHandler } from "../index.js";
 
 const buildHelpString = (locale: NoriLocale) => {
 	// keep track for formatting
@@ -43,7 +43,7 @@ ${optionLines.join("\n")}
 	}[locale];
 };
 
-export const runHelpCommand = (environment: NoriEnvironment): void => {
+export const runHelpCommand: CommandHandler = ({ environment }): void => {
 	logger.log(
 		buildHelpString(environment.preferences.preferredLocale ?? NoriLocale.EnglishBritish)
 	);

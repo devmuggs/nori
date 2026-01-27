@@ -16,6 +16,10 @@ const fs = await import("fs");
 export default class NoriEnvironment implements NoriEnvironmentType {
 	public envFilePath: string;
 
+	private middleware = {
+		onChange: [] as Array<() => void>
+	};
+
 	public input: {
 		target: string;
 	};
@@ -131,7 +135,33 @@ export default class NoriEnvironment implements NoriEnvironmentType {
 
 		const envContent = envLines.join("\n");
 
-		// append to end of file or create new file
-		fs.writeFileSync(this.envFilePath, envContent, { encoding: "utf-8" });
+		try {
+			fs.writeFileSync(this.envFilePath, envContent, { encoding: "utf-8" });
+		} catch (error) {
+			logger.error(
+				`Failed to persist environment configuration to ${this.envFilePath}: ${
+					(error as Error).message
+				}`
+			);
+
+			throw new Error("Failed to persist environment configuration.", { cause: error });
+		}
+
+		logger.info(`Environment configuration persisted to ${this.envFilePath}`);
+	}
+
+	public updateEnvVariable(key: EnvironmentVariable, value: string): void {
+		process.env[key] = value;
+		this.persistEnv();
+
+		try {
+			this.middleware.onChange.forEach((callback) => callback());
+		} catch (error) {
+			logger.error(`Error executing onChange callbacks: ${(error as Error).message}`);
+		}
+	}
+
+	public registerOnChangeCallback(callback: () => void): void {
+		this.middleware.onChange.push(callback);
 	}
 }
