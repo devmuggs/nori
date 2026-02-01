@@ -1,4 +1,4 @@
-import { createNoriI18nCollection, NoriLocale } from "@nori/state-loader/state-loader-types.js";
+import { createNoriI18nCollection, NoriLocale } from "../state-loader/state-loader-types.js";
 
 export const YesNoOptions = Object.freeze([
 	{

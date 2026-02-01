@@ -1,7 +1,7 @@
 import z from "zod";
 
-import { NoriLocale, NoriLocaleMeta } from "@nori/state-loader/state-loader-types.js";
 import { LogLevels } from "consola";
+import { NoriLocale, NoriLocaleMeta } from "../state-loader/state-loader-types.js";
 import { Enum, type EnumValue } from "../utils/enum.js";
 
 /** Available commands for the CLI */
@@ -70,6 +70,14 @@ export const ArgumentOptionConfig = ArgumentOptionMetadata.derive({
 			[NoriLocale.EnglishBritish]:
 				"Set the log level for CLI output (e.g., info, debug, warn, error)",
 			[NoriLocale.Japanese]: "CLI出力のログレベルを設定します（例：info、debug、warn、error）"
+		},
+		options: {
+			trace: LogLevels.trace,
+			debug: LogLevels.debug,
+			info: LogLevels.info,
+			warn: LogLevels.warn,
+			error: LogLevels.error,
+			fatal: LogLevels.fatal
 		}
 	},
 	[ArgumentOption.Verbose]: {
@@ -161,9 +169,11 @@ export const ArgSchemaBase = z
 			ArgumentOption.Help,
 			ArgumentOption.Env
 		]).derive({
-			[ArgumentOption.LogLevel]: z.enum(LogLevels).default(LogLevels.info),
+			[ArgumentOption.LogLevel]: z
+				.enum(Object.keys(LogLevels) as (keyof typeof LogLevels)[])
+				.default("info"),
 			[ArgumentOption.Verbose]: argumentFlagValueSchema,
-			[ArgumentOption.Version]: argumentFlagValueSchema,
+			[ArgumentOption.Version]: z.coerce.number().optional(),
 			[ArgumentOption.ConfigPath]: fileString.optional(),
 			[ArgumentOption.OutputDir]: fileString.optional(),
 			[ArgumentOption.Force]: argumentFlagValueSchema,

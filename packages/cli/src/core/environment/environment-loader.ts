@@ -1,8 +1,10 @@
-import { logger } from "@nori";
-import { ArgumentOption } from "@nori/command-line-interpreter/cli-schema.js";
-import type { EnumValue } from "@nori/utils/enum.js";
 import dotenv from "dotenv";
+
+import { ArgumentOption } from "../command-line-interface/cli-schema.js";
+import { FileSystem } from "../filesystem/index.js";
+import { logger } from "../logger.js";
 import { NoriLocale } from "../state-loader/state-loader-types.js";
+import type { EnumValue } from "../utils/enum.js";
 import {
 	EnvironmentVariable,
 	NoriEnvironmentSchema,
@@ -10,15 +12,14 @@ import {
 	type OutputMode,
 	type SupportedLanguage
 } from "./environment-types.js";
-const fs = await import("fs");
 
 /** Manages Nori environment configuration and persistence */
 export default class NoriEnvironment implements NoriEnvironmentType {
 	public envFilePath: string;
 
-	private middleware = {
+	public middleware = Object.freeze({
 		onChange: [] as Array<() => void>
-	};
+	});
 
 	public input: {
 		target: string;
@@ -40,7 +41,9 @@ export default class NoriEnvironment implements NoriEnvironmentType {
 
 	public readonly isEnvFileFound: boolean;
 
-	constructor() {
+	constructor(
+		private readonly deps: { fileSystem: FileSystem } = { fileSystem: new FileSystem() }
+	) {
 		const argv = process.argv.slice(2);
 		let envPath = process.env.NORI_ENV_PATH;
 
@@ -57,7 +60,7 @@ export default class NoriEnvironment implements NoriEnvironmentType {
 		this.output = config.output;
 		this.preferences = config.preferences;
 
-		this.isEnvFileFound = fs.existsSync(this.envFilePath);
+		this.isEnvFileFound = this.deps.fileSystem.exists(this.envFilePath);
 	}
 
 	public loadEnvValue = (
@@ -136,7 +139,10 @@ export default class NoriEnvironment implements NoriEnvironmentType {
 		const envContent = envLines.join("\n");
 
 		try {
-			fs.writeFileSync(this.envFilePath, envContent, { encoding: "utf-8" });
+			this.deps.fileSystem.writeFile(this.envFilePath, envContent, {
+				encoding: "utf-8",
+				mode: "overwrite"
+			});
 		} catch (error) {
 			logger.error(
 				`Failed to persist environment configuration to ${this.envFilePath}: ${

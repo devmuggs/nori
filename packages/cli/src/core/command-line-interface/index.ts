@@ -49,19 +49,24 @@ export default class CommandLineInterface {
 		logger.debug("Parsing CLI arguments:", this.argStrings);
 		const kvPairs: Record<string, string | boolean> = {};
 
+		// i.e. --log-level=debug or --version 1 or --verbose
 		for (let i = 0; i < this.argStrings.length; i++) {
 			const currentArg = this.argStrings[i];
 			if (!currentArg) break;
 
-			const shape = evaluateArgumentShape(currentArg);
+			const nextArg = this.argStrings.at(i + 1); // 1 or --verbose or undefined
+			const isProbablyValue = nextArg && !nextArg.startsWith("--"); // 1 -> true, --verbose -> false, undefined -> false
+
+			// should either be "--log-level=debug" or "--version 1" or "--verbose"
+			const fullArg = isProbablyValue ? `${currentArg} ${nextArg}` : currentArg;
+			const shape = evaluateArgumentShape(fullArg);
 			const evaluator = ArgumentShapeEvaluators[shape];
 
-			const { key, value } = evaluator(currentArg);
+			const { key, value } = evaluator(fullArg);
 			kvPairs[key] = value;
 
-			if (shape === ArgumentShape.KeyValue || shape === ArgumentShape.KeyEqualsValue) {
-				i++;
-			}
+			// skip next arg if it was used as a value
+			i += isProbablyValue ? 1 : 0;
 		}
 
 		const schemaToUse = CommandArgSchemaMap[this.command];

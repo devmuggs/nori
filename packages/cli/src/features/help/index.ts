@@ -1,5 +1,5 @@
 import { NoriLocale } from "@nori";
-import { ArgumentOptionConfig, CommandConfig } from "@nori/command-line-interpreter/cli-schema.js";
+import { ArgumentOptionConfig, CommandConfig } from "@nori/command-line-interface/cli-schema.js";
 import { logger } from "../../core/logger.js";
 import type { CommandHandler } from "../index.js";
 

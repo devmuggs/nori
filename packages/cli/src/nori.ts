@@ -1,5 +1,5 @@
-import { ArgumentOption, Command } from "@nori/command-line-interpreter/cli-schema.js";
-import CommandLineInterface from "@nori/command-line-interpreter/index.js";
+import { ArgumentOption, Command } from "@nori/command-line-interface/cli-schema.js";
+import CommandLineInterface from "@nori/command-line-interface/index.js";
 import logger from "@nori/logger.js";
 
 import { select } from "@inquirer/prompts";

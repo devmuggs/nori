@@ -1,5 +1,6 @@
 import { select } from "@inquirer/prompts";
 
+import { YesNoOptions } from "../../core/input-manager/constants.js";
 import { logger } from "../../core/logger.js";
 import {
 	createNoriI18nCollection,
@@ -17,24 +18,26 @@ type InitForm = {
 	};
 };
 
+export const inferSystemLocale = (): NoriLocale => {
+	const systemLocale = Intl.DateTimeFormat().resolvedOptions().locale;
+	logger.info(`Detected system locale: ${systemLocale}`);
+
+	if (systemLocale.startsWith("ja")) {
+		logger.debug("Inferring preferred locale as Japanese based on system locale.");
+		return NoriLocale.Japanese;
+	} else {
+		logger.debug("Inferring preferred locale as English (British) based on system locale.");
+		return NoriLocale.EnglishBritish;
+	}
+};
+
 export const runInitCommand: CommandHandler = async ({ environment, cli: { input } }) => {
 	let displayLocale: NoriLocale = NoriLocale.EnglishBritish;
 
 	// Detect system locale if no preferred locale is set
 	if (!environment.preferences.preferredLocale) {
-		const systemLocale = Intl.DateTimeFormat().resolvedOptions().locale;
-		logger.info(`Detected system locale: ${systemLocale}`);
-
-		if (systemLocale.startsWith("ja")) {
-			environment.preferences.preferredLocale = NoriLocale.Japanese;
-			logger.debug("Setting preferred locale to Japanese based on system locale.");
-		} else {
-			environment.preferences.preferredLocale = NoriLocale.EnglishBritish;
-			logger.debug("Setting preferred locale to English (British) based on system locale.");
-		}
-
-		if (environment.preferences.preferredLocale)
-			displayLocale = environment.preferences.preferredLocale;
+		displayLocale = inferSystemLocale();
+		environment.preferences.preferredLocale = displayLocale;
 	}
 
 	// Prompt for locale confirmation
@@ -43,22 +46,7 @@ export const runInitCommand: CommandHandler = async ({ environment, cli: { input
 			[NoriLocale.EnglishBritish]: "Is this your preferred locale?",
 			[NoriLocale.Japanese]: "これはあなたの希望のロケールですか？"
 		}),
-		choices: [
-			{
-				label: createNoriI18nCollection({
-					[NoriLocale.EnglishBritish]: "Yes",
-					[NoriLocale.Japanese]: "はい"
-				}),
-				value: true
-			},
-			{
-				label: createNoriI18nCollection({
-					[NoriLocale.EnglishBritish]: "No",
-					[NoriLocale.Japanese]: "いいえ"
-				}),
-				value: false
-			}
-		],
+		choices: YesNoOptions,
 		default: true
 	});
 

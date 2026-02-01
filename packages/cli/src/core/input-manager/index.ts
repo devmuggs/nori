@@ -1,12 +1,12 @@
 import { input, select } from "@inquirer/prompts";
-import { logger } from "@nori";
-import type NoriEnvironment from "@nori/environment/environment-loader.js";
+import z from "zod";
 import {
 	createNoriI18nCollection,
 	NoriLocale,
 	type NoriI18nCollection
-} from "@nori/state-loader/state-loader-types.js";
-import z from "zod";
+} from "..//state-loader/state-loader-types.js";
+import type NoriEnvironment from "../environment/environment-loader.js";
+import { logger } from "../logger.js";
 
 export class InputManager {
 	private locale: NoriLocale;
@@ -18,9 +18,12 @@ export class InputManager {
 		});
 	}
 
-	public text = async <TSchema extends z.ZodTypeAny = z.ZodString>(options: {
+	public text = async <
+		TSchema extends z.ZodTypeAny = z.ZodString,
+		TValue = z.infer<TSchema>
+	>(options: {
 		prompt: NoriI18nCollection;
-		default?: string | number | boolean;
+		default?: TValue;
 		schema?: TSchema;
 		retryMessage?: NoriI18nCollection;
 	}) => {
@@ -48,10 +51,10 @@ export class InputManager {
 		}
 	};
 
-	select = async (options: {
-		message: NoriI18nCollection;
-		choices: { label: NoriI18nCollection; value: string | number | boolean }[];
-		default?: string | number | boolean;
+	select = async <T>(options: {
+		message: Readonly<NoriI18nCollection>;
+		choices: Readonly<{ label: Readonly<NoriI18nCollection>; value: T }[]>;
+		default?: T;
 	}) => {
 		const selected = await select({
 			message: options.message[this.locale]!,

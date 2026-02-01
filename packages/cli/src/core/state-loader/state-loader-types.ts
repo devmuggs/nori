@@ -37,30 +37,32 @@ export const [NoriEntryParamType] = Enum({
 	Number: "number"
 });
 
-export interface NoriI18nCollection extends Readonly<Partial<Record<NoriLocale, string>>> {
+export interface NoriI18nCollection extends Readonly<Record<NoriLocale, string>> {
 	_meta: {
 		kind: "noriI18nCollection";
 	};
 }
 
-export const createNoriI18nCollection = <
-	const TProps extends Record<string, unknown> | never = never
->(
-	builder:
-		| Omit<NoriI18nCollection, "_meta">
-		| ((props: TProps) => Omit<NoriI18nCollection, "_meta">)
-): TProps extends never ? NoriI18nCollection : (props: TProps) => NoriI18nCollection =>
-	typeof builder === "function"
-		? (((props: TProps) => ({
-				...builder(props),
-				_meta: { kind: "noriI18nCollection" }
-			})) as TProps extends never ? never : (props: TProps) => NoriI18nCollection)
-		: ({
-				...builder,
-				_meta: { kind: "noriI18nCollection" }
-			} as TProps extends never ? NoriI18nCollection : never);
+export const createNoriI18nCollection = (
+	collection: Readonly<Record<NoriLocale, string>>
+): Readonly<NoriI18nCollection> => {
+	return Object.freeze({
+		...collection,
+		_meta: {
+			kind: "noriI18nCollection" as const
+		}
+	});
+};
 
-export const isNoriI18nCollection = (obj: unknown): obj is NoriI18nCollection => {
+export const createNoriI18nCollectionGenerator = <TParams extends Record<string, unknown>>(
+	generator: (params: TParams) => Readonly<NoriI18nCollection>
+) => {
+	return (params: TParams): Readonly<NoriI18nCollection> => {
+		return generator(params);
+	};
+};
+
+export const isNoriI18nCollection = (obj: unknown): obj is Readonly<NoriI18nCollection> => {
 	if (typeof obj !== "object" || obj === null) return false;
 	const record = obj as Record<string, unknown>;
 	if ((record["_meta"] as { _kind?: string })?._kind !== "noriI18nCollection") return false;
