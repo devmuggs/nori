@@ -34,6 +34,15 @@ export class GenerateCommand {
 
 		logger.info("Generating code...");
 
+		// remove the existing generated code directory
+		const generatedCodeDir = FileSystem.normalisePath(`${"./.generated"}/nori`);
+		if (fileSystem.exists(generatedCodeDir)) {
+			logger.info(`Removing existing generated code directory at: ${generatedCodeDir}`);
+			fileSystem.remove(generatedCodeDir, { recursive: true });
+		}
+
+		// generate code for each supported language
+
 		for (const supportedLanguage of SupportedLanguageMeta.values) {
 			const config = environment.output?.[supportedLanguage];
 			if (!config) continue;

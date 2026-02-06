@@ -15,14 +15,18 @@ export const NoriEnvironmentSchema = z.object({
 		.partialRecord(
 			z.enum(SupportedLanguage),
 			z.object({
-				directory: z.string(),
-				mode: z.enum(OutputMode).default(OutputMode.Monolithic)
+				directory: z.string()
+				// mode: z.enum(OutputMode).default(OutputMode.Monolithic)
 			})
 		)
 		.default({
 			[SupportedLanguage.TypeScript]: {
-				directory: ".generated/nori/",
-				mode: OutputMode.Monolithic
+				directory: ".generated/nori/"
+				// mode: OutputMode.Monolithic
+			},
+			[SupportedLanguage.Python]: {
+				directory: ".generated/nori/"
+				// mode: OutputMode.Monolithic
 			}
 		}),
 	preferences: z

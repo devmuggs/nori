@@ -16,11 +16,18 @@ Nori is a fundamental part of many types of Japanese cuisine, used to wrap (maku
 
 ## Features (P0)
 
-- [ ] CLI Tool to serve as developer-first interface
-- [ ] YAML-based configuration for easy setup
-- [ ] Support for multiple translation file formats (e.g., JSON, YAML, PO)
-- [ ] File based, git-friendly storage of translations (easy diffs and versioning)
+- [x] CLI Tool to serve as developer-first interface
+    - [ ] Supports commands:
+        - [x] `nori generate` - Generate code/files based on the YAML configuration
+        - [x] `nori --init` - Interactive project initialization
+- [x] YAML-based project configuration file (`nori.yaml`)
+- [x] File based, git-friendly storage of translations (easy diffs and versioning)
 - [ ] Type-safe code generation of your i18n library to your preferred programming language (Starting with TypeScript & Python)
+    - [x] TypeScript code generator
+    - [ ] Python code generator
+- [x] Interactive project initialization
+- [x] Support for multiple languages/locales
+- [x] Comprehensive documentation and examples
 
 ## Features (P1)
 

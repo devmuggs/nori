@@ -26,7 +26,7 @@ export default class NoriEnvironment implements NoriEnvironmentType {
 			SupportedLanguage,
 			{
 				directory: string;
-				mode: EnumValue<typeof OutputMode>;
+				// mode: EnumValue<typeof OutputMode>;
 			}
 		>
 	>;
@@ -123,7 +123,7 @@ export default class NoriEnvironment implements NoriEnvironmentType {
 			envLines.push(
 				`${EnvironmentVariable.OutputDirectory}_${upperLang}=${outputConfig.directory}`
 			);
-			envLines.push(`${EnvironmentVariable.OutputMode}_${upperLang}=${outputConfig.mode}`);
+			// envLines.push(`${EnvironmentVariable.OutputMode}_${upperLang}=${outputConfig.mode}`);
 		}
 
 		if (this.preferences.preferredLocale) {

@@ -89,10 +89,6 @@ Lets break this into smaller steps:
 
 */
 
-const applyTabLevel = (lines: string[], tabLevel: number): string[] => {
-	return lines.map((line) => "\t".repeat(tabLevel) + line);
-};
-
 export class TypeScriptCodeGenerator {
 	generate(noriYaml: NoriYaml): string {
 		const lines: string[] = [];

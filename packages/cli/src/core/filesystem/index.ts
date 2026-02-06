@@ -42,6 +42,12 @@ export class FileSystem {
 		fs.mkdirSync(normalisedPath, { recursive });
 	}
 
+	public remove(path: string, options: Partial<{ recursive: boolean }> = {}): void {
+		const { recursive = false } = options;
+		const normalisedPath = FileSystem.normalisePath(path);
+		fs.rmSync(normalisedPath, { recursive, force: true });
+	}
+
 	/**
 	 * Normalises file path in case it has things like double slashes etc.
 	 * @param filePath
