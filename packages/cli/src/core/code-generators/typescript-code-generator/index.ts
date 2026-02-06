@@ -100,20 +100,16 @@ export class TypeScriptCodeGenerator {
 		lines.push(TypeScriptCodeGenerator.generateHeader());
 
 		for (const [collectionName, collectionEntries] of Object.entries(noriYaml.collections)) {
-			lines.push(`\n/** Collection: ${collectionName} */\n`);
+			lines.push(`\n/** Collection: ${collectionName} */`);
+			lines.push(`${collectionName}: {`);
 			const entries: string[] = [];
 
 			for (const [key, entry] of Object.entries(collectionEntries)) {
-				entries.push(
-					TypeScriptCodeGenerator.generateFunctionDefinition(
-						key,
-						entry.params,
-						entry.locales
-					)
-				);
+				entries.push(TypeScriptCodeGenerator.generateFunctionDefinition(key, entry));
 			}
 
 			lines.push(entries.join(",\n"));
+			lines.push("},\n");
 		}
 
 		lines.push(TypeScriptCodeGenerator.generateFooter());
@@ -140,11 +136,14 @@ export interface NoriI18nCollection extends Readonly<Record<LanguageCode, string
 }
 
 const createNoriI18nCollection = (
-	collection: Readonly<Record<LanguageCode, string>> & {
-		_meta: { kind: "noriI18nCollection" };
-	}
+	collection: Readonly<Record<LanguageCode, string>>
 ): NoriI18nCollection => {
-	return collection as NoriI18nCollection;
+	return Object.freeze({
+		...collection,
+		_meta: {
+			kind: "noriI18nCollection" as const
+		}
+	});
 };
 
 const createNoriI18nCollectionGenerator = <TParams extends Record<string, any>>(
@@ -218,8 +217,7 @@ const nori = Object.freeze({
 	}
 
 	public static generateFunctionCallParamType(
-		params: YamlCollectionEntryParams | undefined,
-		tabLevel = 0
+		params: YamlCollectionEntryParams | undefined
 	): string {
 		if (!params || Object.keys(params).length === 0) {
 			return "";
@@ -244,14 +242,14 @@ const nori = Object.freeze({
 		return `{\n${lines.join("\n")}\n}`;
 	}
 
-	public static generateI18nBody(i18n: YamlI18nString, tabLevel = 0): string {
+	public static generateI18nBody(i18n: YamlI18nString): string {
 		const localeEntries = Object.entries(i18n).map(([langCode, text]) => {
 			const languageCodeEnum = LanguageCodeMeta.reverseLookup(langCode as LanguageCode);
 			const interpolatedText = TypeScriptCodeGenerator.formatInterpolatedStrings(text);
 			return `[LanguageCode.${languageCodeEnum}]: ${interpolatedText}`;
 		});
 
-		return applyTabLevel(localeEntries, tabLevel).join(",\n");
+		return localeEntries.join(",\n");
 	}
 
 	public static formatInterpolatedStrings(template: string): string {
@@ -260,16 +258,13 @@ const nori = Object.freeze({
 		return `\`${formatted}\``;
 	}
 
-	public static generateRecordValue(entry: YamlCollectionEntry, tabLevel = 0): string {
+	public static generateRecordValue(entry: YamlCollectionEntry): string {
 		const lines: string[] = [];
 		const { params, locales } = entry;
 
 		const hasParams = params && Object.keys(params).length > 0;
-		const paramList = TypeScriptCodeGenerator.generateFunctionCallParams(params, tabLevel + 1);
-		const paramType = TypeScriptCodeGenerator.generateFunctionCallParamType(
-			params,
-			tabLevel + 1
-		);
+		const paramList = TypeScriptCodeGenerator.generateFunctionCallParams(params);
+		const paramType = TypeScriptCodeGenerator.generateFunctionCallParamType(params);
 
 		let nextLine = hasParams
 			? `createNoriI18nCollectionGenerator((${paramList}: ${paramType}) => `
@@ -279,11 +274,7 @@ const nori = Object.freeze({
 
 		lines.push(nextLine);
 
-		lines.push(`\t_meta: {`);
-		lines.push(`\t\tkind: "noriI18nCollection"`);
-		lines.push(`\t},`);
-
-		lines.push(TypeScriptCodeGenerator.generateI18nBody(locales, tabLevel + 1));
+		lines.push(TypeScriptCodeGenerator.generateI18nBody(locales));
 
 		if (hasParams) {
 			lines.push(`})),`);
@@ -299,7 +290,7 @@ const nori = Object.freeze({
 			entry.description
 		);
 		const propertyKey = TypeScriptCodeGenerator.generatePropertyKey(key);
-		const recordValue = TypeScriptCodeGenerator.generateRecordValue(entry, 1);
+		const recordValue = TypeScriptCodeGenerator.generateRecordValue(entry);
 
 		return `${descriptionComment}${propertyKey}: ${recordValue}`;
 	}
