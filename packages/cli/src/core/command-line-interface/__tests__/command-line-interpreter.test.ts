@@ -12,7 +12,7 @@ describe("Command Line Interface", () => {
 			"script.js",
 			"init",
 			"--verbose",
-			"--log-level=debug",
+			"--log-level=warn",
 			"--version 1"
 		];
 		process.argv = testArgs;
@@ -22,7 +22,7 @@ describe("Command Line Interface", () => {
 		expect(testCli.command).toBe("base");
 		expect(testCli.args).toEqual({
 			verbose: true,
-			"log-level": "debug",
+			"log-level": "warn",
 			version: 1,
 			watch: false,
 			force: false,
