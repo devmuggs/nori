@@ -1,20 +1,21 @@
 import { input, select } from "@inquirer/prompts";
 import z from "zod";
+import type NoriEnvironment from "../environment/environment-loader.js";
 import {
 	createNoriI18nCollection,
-	NoriLocale,
+	LanguageCode,
 	type NoriI18nCollection
-} from "..//state-loader/state-loader-types.js";
-import type NoriEnvironment from "../environment/environment-loader.js";
+} from "../locales/index.js";
 import { logger } from "../logger.js";
 
 export class InputManager {
-	private locale: NoriLocale;
+	private locale: LanguageCode;
 
 	constructor(private environment: NoriEnvironment) {
-		this.locale = this.environment.preferences.preferredLocale || NoriLocale.EnglishBritish;
+		this.locale = this.environment.preferences.preferredLocale || LanguageCode.EnglishBritish;
 		this.environment.registerOnChangeCallback(() => {
-			this.locale = this.environment.preferences.preferredLocale || NoriLocale.EnglishBritish;
+			this.locale =
+				this.environment.preferences.preferredLocale || LanguageCode.EnglishBritish;
 		});
 	}
 
@@ -39,11 +40,11 @@ export class InputManager {
 			} catch (error) {
 				logger.error(
 					{
-						[NoriLocale.EnglishBritish]:
-							options.retryMessage?.[NoriLocale.EnglishBritish] ??
+						[LanguageCode.EnglishBritish]:
+							options.retryMessage?.[LanguageCode.EnglishBritish] ??
 							`Invalid input: ${(error as Error).message}. Please try again.`,
-						[NoriLocale.Japanese]:
-							options.retryMessage?.[NoriLocale.Japanese] ??
+						[LanguageCode.Japanese]:
+							options.retryMessage?.[LanguageCode.Japanese] ??
 							`無効な入力: ${(error as Error).message}。もう一度お試しください。`
 					}[this.locale]
 				);
@@ -67,21 +68,21 @@ export class InputManager {
 		return selected;
 	};
 
-	promptLocaleSelection = async (): Promise<NoriLocale> => {
+	promptLocaleSelection = async (): Promise<LanguageCode> => {
 		const selectedLocale = await this.select({
 			message: createNoriI18nCollection({
-				[NoriLocale.EnglishBritish]: "Select your preferred locale:",
-				[NoriLocale.Japanese]: "希望のロケールを選択してください："
+				[LanguageCode.EnglishBritish]: "Select your preferred locale:",
+				[LanguageCode.Japanese]: "希望のロケールを選択してください："
 			}),
-			choices: Object.values(NoriLocale).map((locale) => ({
+			choices: Object.values(LanguageCode).map((locale) => ({
 				label: createNoriI18nCollection({
-					[NoriLocale.EnglishBritish]: locale,
-					[NoriLocale.Japanese]: locale
+					[LanguageCode.EnglishBritish]: locale,
+					[LanguageCode.Japanese]: locale
 				}),
 				value: locale
 			})),
 			default: this.locale
 		});
-		return selectedLocale as NoriLocale;
+		return selectedLocale as LanguageCode;
 	};
 }

@@ -1,12 +1,14 @@
 import z from "zod";
 
 import { LogLevels } from "consola";
-import { NoriLocale, NoriLocaleMeta } from "../state-loader/state-loader-types.js";
+import { LanguageCode, LanguageCodeMeta } from "../locales/index.js";
 import { Enum, type EnumValue } from "../utils/enum.js";
 
 /** Available commands for the CLI */
 export type Command = EnumValue<typeof Command>;
 export const [Command, CommandMeta] = Enum({
+	Help: "help",
+	Init: "init",
 	Generate: "generate",
 	Base: "base",
 	Config: "config"
@@ -16,20 +18,32 @@ export const [Command, CommandMeta] = Enum({
 export const CommandConfig = CommandMeta.derive({
 	[Command.Generate]: {
 		description: {
-			[NoriLocale.EnglishBritish]: "Generate assets based on the Nori configuration",
-			[NoriLocale.Japanese]: "Noriの設定に基づいてアセットを生成します"
+			[LanguageCode.EnglishBritish]: "Generate assets based on the Nori configuration",
+			[LanguageCode.Japanese]: "Noriの設定に基づいてアセットを生成します"
 		}
 	},
 	[Command.Base]: {
 		description: {
-			[NoriLocale.EnglishBritish]: "Base command with no specific action",
-			[NoriLocale.Japanese]: "特定のアクションを持たない基本コマンド"
+			[LanguageCode.EnglishBritish]: "Base command with no specific action",
+			[LanguageCode.Japanese]: "特定のアクションを持たない基本コマンド"
 		}
 	},
 	[Command.Config]: {
 		description: {
-			[NoriLocale.EnglishBritish]: "Manage Nori configuration settings",
-			[NoriLocale.Japanese]: "Noriの設定を管理します"
+			[LanguageCode.EnglishBritish]: "Manage Nori configuration settings",
+			[LanguageCode.Japanese]: "Noriの設定を管理します"
+		}
+	},
+	[Command.Help]: {
+		description: {
+			[LanguageCode.EnglishBritish]: "Display help information about Nori commands",
+			[LanguageCode.Japanese]: "Noriコマンドに関するヘルプ情報を表示します"
+		}
+	},
+	[Command.Init]: {
+		description: {
+			[LanguageCode.EnglishBritish]: "Initialize a new Nori project",
+			[LanguageCode.Japanese]: "新しいNoriプロジェクトを初期化します"
 		}
 	}
 });
@@ -51,10 +65,6 @@ export const [ArgumentOption, ArgumentOptionMetadata] = Enum({
 	Force: "force",
 	/** Enable watch mode for continuous generation */
 	Watch: "watch",
-	/** Initialize a new Nori project */
-	Init: "init",
-	/** Display help information */
-	Help: "help",
 	/** Indicate env file path */
 	Env: "env",
 
@@ -67,9 +77,10 @@ export const [ArgumentOption, ArgumentOptionMetadata] = Enum({
 export const ArgumentOptionConfig = ArgumentOptionMetadata.derive({
 	[ArgumentOption.LogLevel]: {
 		description: {
-			[NoriLocale.EnglishBritish]:
+			[LanguageCode.EnglishBritish]:
 				"Set the log level for CLI output (e.g., info, debug, warn, error)",
-			[NoriLocale.Japanese]: "CLI出力のログレベルを設定します（例：info、debug、warn、error）"
+			[LanguageCode.Japanese]:
+				"CLI出力のログレベルを設定します（例：info、debug、warn、error）"
 		},
 		options: {
 			trace: LogLevels.trace,
@@ -82,63 +93,53 @@ export const ArgumentOptionConfig = ArgumentOptionMetadata.derive({
 	},
 	[ArgumentOption.Verbose]: {
 		description: {
-			[NoriLocale.EnglishBritish]: "Enable verbose logging for more detailed output",
-			[NoriLocale.Japanese]: "詳細な出力のために冗長なログを有効にします"
+			[LanguageCode.EnglishBritish]: "Enable verbose logging for more detailed output",
+			[LanguageCode.Japanese]: "詳細な出力のために冗長なログを有効にします"
 		}
 	},
 	[ArgumentOption.Version]: {
 		description: {
-			[NoriLocale.EnglishBritish]: "Display the current version of Nori CLI",
-			[NoriLocale.Japanese]: "Nori CLIの現在のバージョンを表示します"
+			[LanguageCode.EnglishBritish]: "Display the current version of Nori CLI",
+			[LanguageCode.Japanese]: "Nori CLIの現在のバージョンを表示します"
 		}
 	},
 	[ArgumentOption.ConfigPath]: {
 		description: {
-			[NoriLocale.EnglishBritish]: "Specify the path to the configuration file",
-			[NoriLocale.Japanese]: "設定ファイルのパスを指定します"
+			[LanguageCode.EnglishBritish]: "Specify the path to the configuration file",
+			[LanguageCode.Japanese]: "設定ファイルのパスを指定します"
 		}
 	},
 	[ArgumentOption.OutputDir]: {
 		description: {
-			[NoriLocale.EnglishBritish]: "Define the output directory for generated files",
-			[NoriLocale.Japanese]: "生成されたファイルの出力ディレクトリを定義します"
+			[LanguageCode.EnglishBritish]: "Define the output directory for generated files",
+			[LanguageCode.Japanese]: "生成されたファイルの出力ディレクトリを定義します"
 		}
 	},
 	[ArgumentOption.Force]: {
 		description: {
-			[NoriLocale.EnglishBritish]: "Force overwrite of existing files during generation",
-			[NoriLocale.Japanese]: "生成中に既存のファイルを強制的に上書きします"
+			[LanguageCode.EnglishBritish]: "Force overwrite of existing files during generation",
+			[LanguageCode.Japanese]: "生成中に既存のファイルを強制的に上書きします"
 		}
 	},
 	[ArgumentOption.Watch]: {
 		description: {
-			[NoriLocale.EnglishBritish]:
+			[LanguageCode.EnglishBritish]:
 				"Enable watch mode for continuous generation on file changes",
-			[NoriLocale.Japanese]: "ファイルの変更時に継続的な生成のための監視モードを有効にします"
+			[LanguageCode.Japanese]:
+				"ファイルの変更時に継続的な生成のための監視モードを有効にします"
 		}
 	},
-	[ArgumentOption.Init]: {
-		description: {
-			[NoriLocale.EnglishBritish]: "Initialize a new Nori project with default settings",
-			[NoriLocale.Japanese]: "デフォルト設定で新しいNoriプロジェクトを初期化します"
-		}
-	},
-	[ArgumentOption.Help]: {
-		description: {
-			[NoriLocale.EnglishBritish]: "Display help information about CLI commands and options",
-			[NoriLocale.Japanese]: "CLIコマンドとオプションに関するヘルプ情報を表示します"
-		}
-	},
+
 	[ArgumentOption.Env]: {
 		description: {
-			[NoriLocale.EnglishBritish]: "Specify the path to the environment file",
-			[NoriLocale.Japanese]: "環境ファイルのパスを指定します"
+			[LanguageCode.EnglishBritish]: "Specify the path to the environment file",
+			[LanguageCode.Japanese]: "環境ファイルのパスを指定します"
 		}
 	},
 	[ArgumentOption.SetLocale]: {
 		description: {
-			[NoriLocale.EnglishBritish]: "Set the preferred locale for Nori",
-			[NoriLocale.Japanese]: "Noriの優先ロケールを設定します"
+			[LanguageCode.EnglishBritish]: "Set the preferred locale for Nori",
+			[LanguageCode.Japanese]: "Noriの優先ロケールを設定します"
 		}
 	}
 });
@@ -165,8 +166,6 @@ export const ArgSchemaBase = z
 			ArgumentOption.OutputDir,
 			ArgumentOption.Force,
 			ArgumentOption.Watch,
-			ArgumentOption.Init,
-			ArgumentOption.Help,
 			ArgumentOption.Env
 		]).derive({
 			[ArgumentOption.LogLevel]: z
@@ -178,8 +177,6 @@ export const ArgSchemaBase = z
 			[ArgumentOption.OutputDir]: fileString.optional(),
 			[ArgumentOption.Force]: argumentFlagValueSchema,
 			[ArgumentOption.Watch]: argumentFlagValueSchema,
-			[ArgumentOption.Init]: argumentFlagValueSchema,
-			[ArgumentOption.Help]: argumentFlagValueSchema,
 			[ArgumentOption.Env]: fileString.optional()
 		})
 	})
@@ -201,7 +198,7 @@ export const GenerateArgSchema = ArgSchemaBase.extend({
 
 export type ConfigArgs = z.infer<typeof ConfigArgSchema>;
 export const ConfigArgSchema = ArgSchemaBase.extend({
-	[ArgumentOption.SetLocale]: z.enum(NoriLocaleMeta.values).or(z.boolean()).optional()
+	[ArgumentOption.SetLocale]: z.enum(LanguageCodeMeta.values).or(z.boolean()).optional()
 })
 	.partial()
 	.extend({
@@ -212,7 +209,9 @@ export type ArgSchema = z.infer<typeof ArgSchema>;
 export const ArgSchema = z.union([GenerateArgSchema, ConfigArgSchema, ArgSchemaBase]);
 
 export const CommandArgSchemaMap = CommandMeta.derive({
-	base: ArgSchemaBase,
+	[Command.Base]: ArgSchemaBase,
 	[Command.Generate]: GenerateArgSchema,
-	[Command.Config]: ConfigArgSchema
+	[Command.Config]: ConfigArgSchema,
+	[Command.Help]: ArgSchemaBase,
+	[Command.Init]: ArgSchemaBase
 });

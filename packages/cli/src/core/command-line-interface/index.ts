@@ -7,7 +7,6 @@ import {
 	CommandArgSchemaMap,
 	CommandMeta
 } from "./cli-schema.js";
-import { ArgumentShape } from "./cli-types.js";
 import { ArgumentShapeEvaluators, evaluateArgumentShape } from "./cli-utils.js";
 
 /** Evaluates and processes Nori CLI arguments */

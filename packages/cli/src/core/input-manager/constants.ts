@@ -1,17 +1,18 @@
-import { createNoriI18nCollection, NoriLocale } from "../state-loader/state-loader-types.js";
+import { LanguageCode } from "../locales/locale-enums.js";
+import { createNoriI18nCollection } from "../locales/locale-utils.js";
 
 export const YesNoOptions = Object.freeze([
 	{
 		label: createNoriI18nCollection({
-			[NoriLocale.EnglishBritish]: "Yes",
-			[NoriLocale.Japanese]: "はい"
+			[LanguageCode.EnglishBritish]: "Yes",
+			[LanguageCode.Japanese]: "はい"
 		}),
 		value: true
 	},
 	{
 		label: createNoriI18nCollection({
-			[NoriLocale.EnglishBritish]: "No",
-			[NoriLocale.Japanese]: "いいえ"
+			[LanguageCode.EnglishBritish]: "No",
+			[LanguageCode.Japanese]: "いいえ"
 		}),
 		value: false
 	}
@@ -20,27 +21,27 @@ export const YesNoOptions = Object.freeze([
 export const LocaleOptions = Object.freeze([
 	{
 		label: createNoriI18nCollection({
-			[NoriLocale.EnglishBritish]: "English (British)",
-			[NoriLocale.Japanese]: "英語（英国）"
+			[LanguageCode.EnglishBritish]: "English (British)",
+			[LanguageCode.Japanese]: "英語（英国）"
 		}),
-		value: NoriLocale.EnglishBritish
+		value: LanguageCode.EnglishBritish
 	},
 	{
 		label: createNoriI18nCollection({
-			[NoriLocale.EnglishBritish]: "Japanese (日本語)",
-			[NoriLocale.Japanese]: "日本語（日本語）"
+			[LanguageCode.EnglishBritish]: "Japanese (日本語)",
+			[LanguageCode.Japanese]: "日本語（日本語）"
 		}),
-		value: NoriLocale.Japanese
+		value: LanguageCode.Japanese
 	}
 ] as const);
 
 export const Messages = Object.freeze({
 	InvalidInput: createNoriI18nCollection({
-		[NoriLocale.EnglishBritish]: "Invalid input. Please try again.",
-		[NoriLocale.Japanese]: "無効な入力です。もう一度お試しください。"
+		[LanguageCode.EnglishBritish]: "Invalid input. Please try again.",
+		[LanguageCode.Japanese]: "無効な入力です。もう一度お試しください。"
 	}),
 	SelectPreferredLocale: createNoriI18nCollection({
-		[NoriLocale.EnglishBritish]: "Select your preferred locale:",
-		[NoriLocale.Japanese]: "希望のロケールを選択してください："
+		[LanguageCode.EnglishBritish]: "Select your preferred locale:",
+		[LanguageCode.Japanese]: "希望のロケールを選択してください："
 	})
 });

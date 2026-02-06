@@ -1,9 +1,12 @@
-import { NoriLocale } from "@nori";
-import { ArgumentOptionConfig, CommandConfig } from "@nori/command-line-interface/cli-schema.js";
+import {
+	ArgumentOptionConfig,
+	CommandConfig
+} from "../../core/command-line-interface/cli-schema.js";
+import { LanguageCode } from "../../core/locales/locale-enums.js";
 import { logger } from "../../core/logger.js";
-import type { CommandHandler } from "../index.js";
+import type { CommandContext, ICommand } from "../index.js";
 
-const buildHelpString = (locale: NoriLocale) => {
+const buildHelpString = (locale: LanguageCode) => {
 	// keep track for formatting
 	let longestCommandLength = 0;
 	let longestOptionLength = 0;
@@ -22,7 +25,7 @@ const buildHelpString = (locale: NoriLocale) => {
 	});
 
 	return {
-		[NoriLocale.EnglishBritish]: `Available Commands and Options:
+		[LanguageCode.EnglishBritish]: `Available Commands and Options:
 Usage: nori [command] [options]
 
 Commands:
@@ -31,7 +34,7 @@ ${commandLines.join("\n")}
 Options:
 ${optionLines.join("\n")}
 `,
-		[NoriLocale.Japanese]: `利用可能なコマンドとオプション：
+		[LanguageCode.Japanese]: `利用可能なコマンドとオプション：
 使用法: nori [コマンド] [オプション]
 
 コマンド:
@@ -43,8 +46,11 @@ ${optionLines.join("\n")}
 	}[locale];
 };
 
-export const runHelpCommand: CommandHandler = ({ environment }): void => {
-	logger.log(
-		buildHelpString(environment.preferences.preferredLocale ?? NoriLocale.EnglishBritish)
-	);
-};
+export class HelpCommand implements ICommand {
+	public async execute(params: CommandContext): Promise<void> {
+		const { environment } = params;
+		const locale = environment.preferences.preferredLocale || LanguageCode.EnglishBritish;
+		const helpString = buildHelpString(locale);
+		logger.log(helpString);
+	}
+}

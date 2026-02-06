@@ -40,8 +40,8 @@
 
 		// Path Mappings
 		"paths": {
-			"@nori": ["./src/core/index.ts"],
-			"@nori/*": ["./src/core/*"]
+			// "@nori": ["./src/core/index.ts"],
+			// "@nori/*": ["./src/core/*"]
 		}
 	},
 

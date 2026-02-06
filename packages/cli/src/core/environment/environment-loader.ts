@@ -1,17 +1,13 @@
 import dotenv from "dotenv";
 
+import type { SupportedLanguage } from "../code-generators/code-generator-enums.js";
 import { ArgumentOption } from "../command-line-interface/cli-schema.js";
 import { FileSystem } from "../filesystem/index.js";
+import { LanguageCode } from "../locales/index.js";
 import { logger } from "../logger.js";
-import { NoriLocale } from "../state-loader/state-loader-types.js";
 import type { EnumValue } from "../utils/enum.js";
-import {
-	EnvironmentVariable,
-	NoriEnvironmentSchema,
-	type NoriEnvironmentType,
-	type OutputMode,
-	type SupportedLanguage
-} from "./environment-types.js";
+import { EnvironmentVariable, OutputMode } from "./environment-enums.js";
+import { type NoriEnvironmentType, NoriEnvironmentSchema } from "./environment-schemas.js";
 
 /** Manages Nori environment configuration and persistence */
 export default class NoriEnvironment implements NoriEnvironmentType {
@@ -27,7 +23,7 @@ export default class NoriEnvironment implements NoriEnvironmentType {
 
 	public output: Partial<
 		Record<
-			EnumValue<typeof SupportedLanguage>,
+			SupportedLanguage,
 			{
 				directory: string;
 				mode: EnumValue<typeof OutputMode>;
@@ -36,7 +32,7 @@ export default class NoriEnvironment implements NoriEnvironmentType {
 	>;
 
 	public preferences: {
-		preferredLocale?: NoriLocale | undefined;
+		preferredLocale?: LanguageCode | undefined;
 	};
 
 	public readonly isEnvFileFound: boolean;
@@ -101,7 +97,7 @@ export default class NoriEnvironment implements NoriEnvironmentType {
 			}),
 			preferences: {
 				preferredLocale: this.loadEnvValue(EnvironmentVariable.PreferredLocale, {
-					defaultValue: NoriLocale.EnglishBritish
+					defaultValue: LanguageCode.EnglishBritish
 				})
 			},
 			input: {

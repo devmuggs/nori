@@ -1,5 +1,5 @@
 import { NoriEnvironment } from "@nori";
-import { OutputMode, SupportedLanguage } from "@nori/environment/environment-types.js";
+import { OutputMode, SupportedLanguage } from "@nori/environment/environment-schemas.js";
 
 // export const noriConfig = new NoriEnvironment({
 // 	envFilePath: ".env",

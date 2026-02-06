@@ -1,7 +1,8 @@
 import { jest } from "@jest/globals";
 import logger from "../../logger.js";
+import { EnvironmentVariable } from "../environment-enums.js";
 import NoriEnvironment from "../environment-loader.js";
-import { EnvironmentVariable } from "../environment-types.js";
+
 const env = new NoriEnvironment();
 
 describe("Environment Loader", () => {

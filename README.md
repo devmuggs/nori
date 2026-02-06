@@ -6,24 +6,32 @@ Nori is a free and open-source translation management system designed to help de
 
 Nori is a fundamental part of many types of Japanese cuisine, used to wrap (maku) various ingredients to create delicious dishes. Just as nori enhances the flavour and presentation of food, Nori (the software) enhances the translation process by providing a robust platform for managing and collaborating on localisation projects.
 
+## MVP Scope
+
+- No nested collections
+- Single export format mode (monolithic, all translations in a single file, not split by collection, not split by locale)
+- No object or array types for translation entries (only string, boolean, or number)
+- No pluralization support
+- Limit support to TypeScript and Python for code generation
+
 ## Features (P0)
 
--   [ ] CLI Tool to serve as developer-first interface
--   [ ] YAML-based configuration for easy setup
--   [ ] Support for multiple translation file formats (e.g., JSON, YAML, PO)
--   [ ] File based, git-friendly storage of translations (easy diffs and versioning)
--   [ ] Type-safe code generation of your i18n library to your preferred programming language (Starting with TypeScript & Python)
+- [ ] CLI Tool to serve as developer-first interface
+- [ ] YAML-based configuration for easy setup
+- [ ] Support for multiple translation file formats (e.g., JSON, YAML, PO)
+- [ ] File based, git-friendly storage of translations (easy diffs and versioning)
+- [ ] Type-safe code generation of your i18n library to your preferred programming language (Starting with TypeScript & Python)
 
 ## Features (P1)
 
--   [ ] Web interface for non-technical collaborators
--   [ ] Real-time collaboration and editing of translations
+- [ ] Web interface for non-technical collaborators
+- [ ] Real-time collaboration and editing of translations
 
 ## Features (P2)
 
--   [ ] Integration with popular version control systems (e.g., GitHub, GitLab)
--   [ ] API for programmatic access to translation data
--   [ ] User authentication and role-based access control
+- [ ] Integration with popular version control systems (e.g., GitHub, GitLab)
+- [ ] API for programmatic access to translation data
+- [ ] User authentication and role-based access control
 
 ## Installation
 
@@ -97,9 +105,9 @@ collections:
 
 ## Project Structure
 
--   `packages/cli/`: The command-line interface.
--   `packages/api-backend/`: Backend API (planned).
--   `packages/web-client/`: Web interface (planned).
+- `packages/cli/`: The command-line interface.
+- `packages/api-backend/`: Backend API (planned).
+- `packages/web-client/`: Web interface (planned).
 
 ## Contributing
 
