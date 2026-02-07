@@ -1,8 +1,7 @@
 import z from "zod";
 
+import { type EnumValue, Enum, LanguageCode, LanguageCodeMeta } from "@nori/core";
 import { LogLevels } from "consola";
-import { LanguageCode, LanguageCodeMeta } from "../locales/index.js";
-import { Enum, type EnumValue } from "../utils/enum.js";
 
 /** Available commands for the CLI */
 export type Command = EnumValue<typeof Command>;

@@ -1,8 +1,8 @@
 import { select } from "@inquirer/prompts";
 
+import { LanguageCode, LanguageCodeMeta } from "@nori/core";
 import type { ArgSchema } from "../../core/command-line-interface/cli-schema.js";
 import { ArgumentOption, Command } from "../../core/command-line-interface/cli-schema.js";
-import { LanguageCode, LanguageCodeMeta } from "../../core/locales/locale-enums.js";
 import { logger } from "../../core/logger.js";
 import type { CommandContext, ICommand } from "../index.js";
 

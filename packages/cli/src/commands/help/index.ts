@@ -1,8 +1,8 @@
+import { LanguageCode } from "@nori/core";
 import {
 	ArgumentOptionConfig,
 	CommandConfig
 } from "../../core/command-line-interface/cli-schema.js";
-import { LanguageCode } from "../../core/locales/locale-enums.js";
 import { logger } from "../../core/logger.js";
 import type { CommandContext, ICommand } from "../index.js";
 

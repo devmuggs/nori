@@ -1,7 +1,6 @@
+import { LanguageCode } from "@nori/core";
 import z from "zod";
 import { SupportedLanguage } from "../code-generators/code-generator-enums.js";
-import { LanguageCode } from "../locales/index.js";
-import { OutputMode } from "./environment-enums.js";
 
 export type NoriEnvironmentType = z.infer<typeof NoriEnvironmentSchema>;
 export const NoriEnvironmentSchema = z.object({

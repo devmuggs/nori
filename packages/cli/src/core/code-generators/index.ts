@@ -1,6 +1,6 @@
 import logger from "../logger.js";
-import type { NoriYaml } from "../state/state-schemas.js";
-import { Enum, type EnumValue } from "../utils/enum.js";
+
+import { Enum, type EnumValue, type NoriYaml } from "@nori/core";
 import { PythonCodeGenerator } from "./python-code-generator/index.js";
 import { TypeScriptCodeGenerator } from "./typescript-code-generator/index.js";
 

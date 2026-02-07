@@ -1,11 +1,10 @@
 import dotenv from "dotenv";
 
+import { LanguageCode } from "@nori/core";
 import type { SupportedLanguage } from "../code-generators/code-generator-enums.js";
 import { ArgumentOption } from "../command-line-interface/cli-schema.js";
 import { FileSystem } from "../filesystem/index.js";
-import { LanguageCode } from "../locales/index.js";
 import { logger } from "../logger.js";
-import type { EnumValue } from "../utils/enum.js";
 import { EnvironmentVariable, OutputMode } from "./environment-enums.js";
 import { type NoriEnvironmentType, NoriEnvironmentSchema } from "./environment-schemas.js";
 

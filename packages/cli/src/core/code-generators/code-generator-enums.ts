@@ -1,4 +1,4 @@
-import { Enum, type EnumValue } from "../utils/enum.js";
+import { type EnumValue, Enum } from "@nori/core";
 
 export type SupportedLanguage = EnumValue<typeof SupportedLanguage>;
 export const [SupportedLanguage, SupportedLanguageMeta] = Enum({

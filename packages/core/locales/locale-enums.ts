@@ -1,4 +1,4 @@
-import { type EnumValue, Enum } from "../utils/enum.js";
+import { Enum, type EnumValue } from "../utils/enum.js";
 
 export type LanguageCode = EnumValue<typeof LanguageCode>;
 export const [LanguageCode, LanguageCodeMeta] = Enum({

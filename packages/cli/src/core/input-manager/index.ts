@@ -1,11 +1,7 @@
 import { input, select } from "@inquirer/prompts";
+import { createNoriI18nCollection, LanguageCode, type NoriI18nCollection } from "@nori/core";
 import z from "zod";
 import type NoriEnvironment from "../environment/environment-loader.js";
-import {
-	createNoriI18nCollection,
-	LanguageCode,
-	type NoriI18nCollection
-} from "../locales/index.js";
 import { logger } from "../logger.js";
 
 export class InputManager {

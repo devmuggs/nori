@@ -1,11 +1,7 @@
 import { select } from "@inquirer/prompts";
 
+import { createNoriI18nCollection, LanguageCode, LanguageCodeMeta } from "@nori/core";
 import { YesNoOptions } from "../../core/input-manager/constants.js";
-import {
-	createNoriI18nCollection,
-	LanguageCode,
-	LanguageCodeMeta
-} from "../../core/locales/index.js";
 import { logger } from "../../core/logger.js";
 import type { CommandContext, CommandHandler } from "../index.js";
 

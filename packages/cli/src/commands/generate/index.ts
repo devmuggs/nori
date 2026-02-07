@@ -3,10 +3,12 @@ import {
 	SupportedLanguageMeta
 } from "../../core/code-generators/code-generator-enums.js";
 import { FileSystem } from "../../core/filesystem/index.js";
-import { NoriYamlSchema, codeGeneratorFactory } from "../../core/index.js";
 import logger from "../../core/logger.js";
-import Yaml from "../../core/state/state-utils.js";
 import type { CommandContext } from "../index.js";
+
+import { NoriYamlSchema } from "@nori/core";
+import Yaml from "@nori/core/state/state-utils.js";
+import { codeGeneratorFactory } from "../../core/index.js";
 
 export class GenerateCommand {
 	public async execute({ environment }: CommandContext): Promise<void> {

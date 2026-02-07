@@ -1,4 +1,4 @@
-import { Enum, type EnumValue } from "../utils/enum.js";
+import { type EnumValue, Enum } from "@nori/core";
 
 export type OutputMode = EnumValue<typeof OutputMode>;
 export const [OutputMode] = Enum({

@@ -1,30 +1,14 @@
-import { LanguageCode, LanguageCodeMeta } from "../../locales/locale-enums.js";
 import {
-	createNoriI18nCollection,
-	createNoriI18nCollectionGenerator
-} from "../../locales/locale-utils.js";
-import { ParamType, ParamTypeMeta } from "../../state/state-enums.js";
-import type {
-	NoriYaml,
-	YamlCollectionEntries,
-	YamlCollectionEntry,
-	YamlCollectionEntryParams,
-	YamlI18nString,
-	YamlI18nStringOrString
-} from "../../state/state-schemas.js";
-
-const nori = {
-	interpolated: createNoriI18nCollectionGenerator(({ name }: { name: string }) =>
-		createNoriI18nCollection({
-			[LanguageCode.EnglishBritish]: `Hello, ${name}!`,
-			[LanguageCode.Japanese]: `こんにちは、${name}さん！`
-		})
-	),
-	static: createNoriI18nCollection({
-		[LanguageCode.EnglishBritish]: "Welcome to Nori!",
-		[LanguageCode.Japanese]: "Noriへようこそ！"
-	})
-};
+	LanguageCode,
+	LanguageCodeMeta,
+	ParamType,
+	ParamTypeMeta,
+	type NoriYaml,
+	type YamlCollectionEntry,
+	type YamlCollectionEntryParams,
+	type YamlI18nString,
+	type YamlI18nStringOrString
+} from "@nori/core";
 
 /*
 

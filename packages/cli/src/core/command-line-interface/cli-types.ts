@@ -1,5 +1,4 @@
-import { LogLevels } from "../logger.js";
-import { Enum, type EnumValue } from "../utils/enum.js";
+import { Enum, type EnumValue } from "@nori/core";
 
 /** Shapes that CLI arguments can take */
 export type ArgumentShape = EnumValue<typeof ArgumentShape>;

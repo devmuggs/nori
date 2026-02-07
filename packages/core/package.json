@@ -1,0 +1,11 @@
+{
+	"private": true,
+	"name": "@nori/core",
+	"version": "1.0.0",
+	"description": "Core utilities and functionalities for the Nori platform, including localization, state management, and common helper functions.",
+	"main": "index.ts",
+	"type": "module",
+	"dependencies": {
+		"yaml": "^2.8.2"
+	}
+}

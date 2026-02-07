@@ -1,5 +1,4 @@
-import { LanguageCode } from "../locales/locale-enums.js";
-import { createNoriI18nCollection } from "../locales/locale-utils.js";
+import { createNoriI18nCollection, LanguageCode } from "@nori/core";
 
 export const YesNoOptions = Object.freeze([
 	{

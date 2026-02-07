@@ -1,4 +1,4 @@
-import type { InputManager } from "@nori/input-manager/index.js";
+import type { InputManager } from "../input-manager/index.js";
 import logger from "../logger.js";
 import {
 	ArgSchema,

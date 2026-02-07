@@ -1,12 +1,14 @@
-import { LanguageCode, LanguageCodeMeta } from "../../locales/locale-enums.js";
-import { ParamType, ParamTypeMeta } from "../../state/state-enums.js";
-import type {
-	NoriYaml,
-	YamlCollectionEntry,
-	YamlCollectionEntryParams,
-	YamlI18nString,
-	YamlI18nStringOrString
-} from "../../state/state-schemas.js";
+import {
+	LanguageCode,
+	LanguageCodeMeta,
+	ParamType,
+	ParamTypeMeta,
+	type NoriYaml,
+	type YamlCollectionEntry,
+	type YamlCollectionEntryParams,
+	type YamlI18nString,
+	type YamlI18nStringOrString
+} from "@nori/core";
 import type { ICodeGenerator } from "../index.js";
 
 /**
