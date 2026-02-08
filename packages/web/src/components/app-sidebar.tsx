@@ -35,6 +35,7 @@ import {
 	DialogTitle
 } from "./ui/dialog";
 import { ProjectForm, useProjectForm } from "./workspace/projects";
+import { WatchedFilePreview } from "./workspace/projects/project-details";
 import {
 	useActiveProject,
 	useProjects,
@@ -88,7 +89,7 @@ export function AppSidebar() {
 				<SidebarHeader>
 					<SidebarMenu>
 						<SidebarMenuItem>
-							<h1 className="p-2">{workspaceName || "Nori I18n Manager"}</h1>
+							<h1 className="p-2">{workspaceName || "Nori"}</h1>
 						</SidebarMenuItem>
 					</SidebarMenu>
 				</SidebarHeader>
@@ -122,24 +123,36 @@ export function AppSidebar() {
 														tooltip={project.description}
 														className="h-12 my-1"
 													>
-														<div
-															className={clsx(
-																"flex flex-col overflow-hidden",
-																{
-																	"text-muted-foreground":
-																		!isActive,
-																	"font-medium": isActive
-																}
+														<div className="flex gap-2">
+															{project.configuration
+																.thumbnailPath && (
+																<WatchedFilePreview
+																	className="size-8 bg-white/50 p-1"
+																	filePath={
+																		project.configuration
+																			.thumbnailPath
+																	}
+																/>
 															)}
-														>
-															<span>{project.name}</span>
-															<span
+															<div
 																className={clsx(
-																	"truncate text-muted-foreground text-xs"
+																	"flex flex-col overflow-hidden",
+																	{
+																		"text-muted-foreground":
+																			!isActive,
+																		"font-medium": isActive
+																	}
 																)}
 															>
-																{project.description}
-															</span>
+																<span>{project.name}</span>
+																<span
+																	className={clsx(
+																		"truncate text-muted-foreground text-xs"
+																	)}
+																>
+																	{project.description}
+																</span>
+															</div>
 														</div>
 													</SidebarMenuButton>
 												</SidebarMenuItem>

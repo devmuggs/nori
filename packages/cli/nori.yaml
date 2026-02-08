@@ -6,32 +6,228 @@ meta:
         description: A Nori project
     version: 1.0.0
 collections:
-    root:
-        lets-get-started:
+    locale:
+        detected-system-locale:
             description:
-                en-GB: Displayed on first step of onboarding wizard.
-                ja-JP: オンボーディングウィザードの最初のステップに表示されます。
-            params:
-                topic:
-                    type: string
-                    description:
-                        en-GB: The topic to get started with.
-                        ja-JP: 始めるトピック。
+                en-GB: Detect the system locale.
+                ja-JP: システムのロケールを検出します。
             locales:
-                en-GB: Let's get started with {{topic}}.
-                ja-JP: さあ、{{topic}}を始めましょう！
-    client:
-        greeting:
+                en-GB: Detected System Locale
+                ja-JP: 検出されたシステムロケール
+
+        inferred-locale-as-by-system-locale:
             description:
-                en-GB: A friendly greeting message.
-                ja-JP: 親しみやすい挨拶メッセージ。
+                en-GB: Inferred locale based on system settings.
+                ja-JP: システム設定に基づいて推測されたロケール。
             locales:
-                en-GB: Hello!
-                ja-JP: こんにちは！
-        farewell:
+                en-GB: Inferred Locale {{locale}} as System Locale
+                ja-JP: システムロケールとして推測されたロケール{{locale}}
+
+        select-preferred-locale:
             description:
-                en-GB: A friendly farewell message.
-                ja-JP: 親しみやすい別れのメッセージ。
+                en-GB: Prompt to select preferred locale.
+                ja-JP: 優先ロケールを選択するためのプロンプト。
             locales:
-                en-GB: Goodbye!
-                ja-JP: さようなら！
+                en-GB: Please select your preferred locale
+                ja-JP: 優先するロケールを選択してください
+
+        selected-locale-confirmation:
+            description:
+                en-GB: Confirmation message for selected locale.
+                ja-JP: 選択したロケールの確認メッセージ。
+            locales:
+                en-GB: You have selected {{locale}} as your preferred locale.
+                ja-JP: "{{locale}}を優先ロケールとして選択しました。"
+
+        invalid-locale-selection:
+            description:
+                en-GB: Message displayed for invalid locale selection.
+                ja-JP: 無効なロケール選択に対して表示されるメッセージ。
+            locales:
+                en-GB: The locale you selected is not valid. Please try again.
+                ja-JP: 選択したロケールは無効です。もう一度お試しください。
+
+    locale-options:
+        en-GB:
+            description:
+                en-GB: Display text for English (United Kingdom) locale.
+                ja-JP: 英語（イギリス）ロケールの表示テキスト。
+            locales:
+                en-GB: English (UK)
+                ja-JP: 英語（英国）
+
+        ja-JP:
+            description:
+                en-GB: Display text for Japanese (Japan) locale.
+                ja-JP: 日本語（日本）ロケールの表示テキスト。
+            locales:
+                en-GB: Japanese (Japan)
+                ja-JP: 日本語（日本）
+
+    input:
+        yes:
+            description:
+                en-GB: Affirmative response.
+                ja-JP: 肯定的な返答。
+            locales:
+                en-GB: Yes
+                ja-JP: はい
+        no:
+            description:
+                en-GB: Negative response.
+                ja-JP: 否定的な返答。
+            locales:
+                en-GB: No
+                ja-JP: いいえ
+
+        invalid-input:
+            description:
+                en-GB: Message displayed for invalid input.
+                ja-JP: 無効な入力に対して表示されるメッセージ。
+            locales:
+                en-GB: The input provided is invalid. Please try again.
+                ja-JP: 入力が無効です。もう一度お試しください。
+
+    project-labels:
+        author:
+            description:
+                en-GB: Label for project author.
+                ja-JP: プロジェクトの著者のラベル。
+            locales:
+                en-GB: Author
+                ja-JP: 著者
+
+        name:
+            description:
+                en-GB: Label for project name.
+                ja-JP: プロジェクト名のラベル。
+            locales:
+                en-GB: Project Name
+                ja-JP: プロジェクト名
+
+        description:
+            description:
+                en-GB: Label for project description.
+                ja-JP: プロジェクトの説明のラベル。
+            locales:
+                en-GB: Project Description
+                ja-JP: プロジェクトの説明
+
+        version:
+            description:
+                en-GB: Label for project version.
+                ja-JP: プロジェクトのバージョンのラベル。
+            locales:
+                en-GB: Project Version
+                ja-JP: プロジェクトのバージョン
+
+        default-description:
+            description:
+                en-GB: Default description for a Nori project.
+                ja-JP: Noriプロジェクトのデフォルトの説明。
+            locales:
+                en-GB: I18n by Nori ≽^•⩊•^≼
+                ja-JP: NoriによるI18n ≽^•⩊•^≼
+
+    env:
+        missing-env-file:
+            description:
+                en-GB: Message displayed when the .env file is missing.
+                ja-JP: .envファイルが見つからない場合に表示されるメッセージ。
+            locales:
+                en-GB: "Warning: .env file is missing. Please create one to proceed."
+                ja-JP: "警告：.envファイルが見つかりません。続行するには作成してください。"
+
+        create-now-prompt:
+            description:
+                en-GB: Prompt to create a .env file now.
+                ja-JP: 今すぐ.envファイルを作成するためのプロンプト。
+            locales:
+                en-GB: Would you like to create a .env file now? (yes/no)
+                ja-JP: 今すぐ.envファイルを作成しますか？（はい/いいえ）
+
+        env-created-success:
+            description:
+                en-GB: Message displayed when the .env file is created successfully.
+                ja-JP: .envファイルが正常に作成された場合に表示されるメッセージ。
+            locales:
+                en-GB: .env file created successfully.
+                ja-JP: .envファイルが正常に作成されました。
+
+        env-creation-skipped:
+            description:
+                en-GB: Message displayed when the creation of the .env file is skipped.
+                ja-JP: .envファイルの作成がスキップされた場合に表示されるメッセージ。
+            locales:
+                en-GB: .env file creation skipped.
+                ja-JP: .envファイルの作成がスキップされました。
+
+        env-file-exists-update-prompt:
+            description:
+                en-GB: Prompt to update the existing .env file.
+                ja-JP: 既存の.envファイルを更新するためのプロンプト。
+            locales:
+                en-GB: A .env file already exists. Would you like to update it? (yes/no)
+                ja-JP: .envファイルは既に存在します。更新しますか？（はい/いいえ）
+
+    init:
+        init-complete:
+            description:
+                en-GB: Message displayed when project initialization is complete.
+                ja-JP: プロジェクトの初期化が完了した場合に表示されるメッセージ。
+            locales:
+                en-GB: Project initialization complete! Please enjoy using Nori.
+                ja-JP: プロジェクトの初期化が完了しました！ Noriの使用をお楽しみください。
+
+    command-descriptions:
+        generate:
+            description:
+                en-GB: Description for the generate command.
+                ja-JP: generateコマンドの説明。
+            locales:
+                en-GB: Generate code from Nori YAML configuration.
+                ja-JP: Nori YAML構成からコードを生成します。
+        base:
+            description:
+                en-GB: Description for the base command.
+                ja-JP: baseコマンドの説明。
+            locales:
+                en-GB: Base command with no specific action.
+                ja-JP: 特定のアクションのない基本コマンド。
+        config:
+            description:
+                en-GB: Description for the config command.
+                ja-JP: configコマンドの説明。
+            locales:
+                en-GB: Manage Nori configuration settings.
+                ja-JP: Noriの構成設定を管理します。
+        help:
+            description:
+                en-GB: Description for the help command.
+                ja-JP: helpコマンドの説明。
+            locales:
+                en-GB: Display help information about Nori commands.
+                ja-JP: Noriコマンドに関するヘルプ情報を表示します。
+        init:
+            description:
+                en-GB: Description for the init command.
+                ja-JP: initコマンドの説明。
+            locales:
+                en-GB: Initialize a new Nori project.
+                ja-JP: 新しいNoriプロジェクトを初期化します。
+
+    argument-descriptions:
+        log-level:
+            description:
+                en-GB: Description for the log-level argument.
+                ja-JP: log-level引数の説明。
+            locales:
+                en-GB: Set the logging level for Nori operations.
+                ja-JP: Nori操作のログレベルを設定します。
+        watch:
+            description:
+                en-GB: Description for the watch argument.
+                ja-JP: watch引数の説明。
+            locales:
+                en-GB: Enable watch mode to monitor file changes.
+                ja-JP: ファイルの変更を監視するウォッチモードを有効にします。

@@ -1,5 +1,6 @@
+import { NoriSDK } from "@nori/core";
+import type { FileSystemResponse } from "@nori/core/sdk/file-system";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import clsx from "clsx";
 import { ChevronLeft } from "lucide-react";
 import { useState, type FC } from "react";
@@ -8,49 +9,21 @@ import { Field, FieldGroup, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
 import { Switch } from "../ui/switch";
 
-export type FileSystemResponse = {
-	dir: string;
-	children: {
-		name: string;
-		isDirectory: boolean;
-	}[];
-};
-
 const requestFileSystem = async (options: {
 	path: string;
 	showHidden: boolean;
 	extensions?: string[];
 }): Promise<FileSystemResponse | null> => {
 	try {
-		const url = new URL("http://localhost:3080/file-system");
-		if (options.path) url.searchParams.append("q", options.path);
-		if (options.extensions && options.extensions.length > 0) {
-			url.searchParams.append("extensions", options.extensions.join(","));
-		}
-
-		url.searchParams.append("showHidden", options.showHidden ? "true" : "false");
-
-		const request = await axios.get(url.toString());
-		console.debug(`Selected directory response:`, request.data);
-		console.debug("Selected directory:", JSON.stringify(request.data.data));
-		return request.data.data as FileSystemResponse;
+		return await NoriSDK.fileSystem.listDirectory({
+			q: options.path,
+			"show-hidden": options.showHidden ? "true" : "false",
+			"allowed-extensions": options.extensions || []
+		});
 	} catch (error) {
 		console.error("Error selecting directory:", error);
 		return null;
 	}
-};
-const pathToStack = (path: string): string[] => {
-	const segments = path.split("/").filter((segment) => segment.length > 0);
-	const stack: string[] = [];
-	for (const segment of segments) {
-		if (segment === ".") continue;
-		if (segment === "..") {
-			stack.pop();
-		} else {
-			stack.push(segment);
-		}
-	}
-	return stack;
 };
 
 const Preview: FC<{
@@ -67,7 +40,8 @@ const Preview: FC<{
 	if (isLoading) return <div>Loading...</div>;
 	if (error) return <div>Error loading file system.</div>;
 
-	const parentDirectory = pathToStack(data?.dir || "")
+	const parentDirectory = NoriSDK.fileSystem.helpers
+		.pathStringToStack(data?.dir || "")
 		.slice(0, -1)
 		.join("/");
 
@@ -120,7 +94,7 @@ export const FileBrowser: FC<{ extensions?: string[]; onSelect: (path: string) =
 	const currentPath = pathStack[pathStack.length - 1] || "";
 
 	const addPath = (path: string) => {
-		const newPath = pathToStack(path).join("/");
+		const newPath = NoriSDK.fileSystem.helpers.pathStringToStack(path).join("/");
 		setPathStack((prev) => [...prev, newPath]);
 	};
 

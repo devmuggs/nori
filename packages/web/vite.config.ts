@@ -12,6 +12,6 @@ export default defineConfig({
 		}
 	},
 	optimizeDeps: {
-		include: ["zustand", "immer"]
+		include: ["zustand", "immer", "shiki"]
 	}
 });

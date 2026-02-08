@@ -2,7 +2,7 @@ import { FileBrowser } from "@/components/file-browser/file-browser";
 import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem, useCarousel } from "@/components/ui/carousel";
 import { Enum } from "@nori/core";
-import { type FC } from "react";
+import { useState, type FC } from "react";
 import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSeparator } from "../../ui/field";
 import { Input } from "../../ui/input";
 import type { UseProjectFormReturn } from "./use-project-form";
@@ -12,11 +12,16 @@ const [CarouselSlides] = Enum({
 	FileBrowser: 1
 });
 
+const noriExtensions = [".yaml", ".yml"];
+const imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp"];
+
 export type ProjectFormProps = {
 	controls: UseProjectFormReturn;
 };
 export const ProjectForm: FC<ProjectFormProps> = ({ controls }) => {
 	const { values, onChange } = controls;
+
+	const [fileBrowserMode, setFileBrowserMode] = useState<"source" | "thumbnail">("source");
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
@@ -83,9 +88,7 @@ export const ProjectForm: FC<ProjectFormProps> = ({ controls }) => {
 							{/* Input/Output files */}
 							<FieldGroup>
 								<Field>
-									<FieldLabel htmlFor="project-source-file">
-										Nori File Path
-									</FieldLabel>
+									<FieldLabel htmlFor="project-source-file">Nori File</FieldLabel>
 									<div className="flex gap-2 justify-between">
 										<Input
 											id="project-source-file"
@@ -108,9 +111,10 @@ export const ProjectForm: FC<ProjectFormProps> = ({ controls }) => {
 										/>
 										<Button
 											type="button"
-											onClick={() =>
-												carousel.goToIndex(CarouselSlides.FileBrowser)
-											}
+											onClick={() => {
+												carousel.goToIndex(CarouselSlides.FileBrowser);
+												setFileBrowserMode("source");
+											}}
 										>
 											Browse
 										</Button>
@@ -119,19 +123,61 @@ export const ProjectForm: FC<ProjectFormProps> = ({ controls }) => {
 										Path to the Nori file for this project.
 									</FieldDescription>
 								</Field>
+								<Field>
+									<FieldLabel htmlFor="project-thumbnail-path">
+										Project Thumbnail
+									</FieldLabel>
+									<div className="flex gap-2 justify-between">
+										<Input
+											id="project-thumbnail-path"
+											className="truncate"
+											placeholder="location of your nori.yaml file"
+											type="text"
+											value={configuration.thumbnailPath || ""}
+											onChange={(e) => {
+												onChange({
+													...values,
+													configuration: {
+														...configuration,
+														thumbnailPath: e.target.value
+													}
+												});
+											}}
+											aria-invalid={!values.configuration?.thumbnailPath}
+											autoComplete="off"
+											autoCorrect="off"
+										/>
+										<Button
+											type="button"
+											onClick={() => {
+												carousel.goToIndex(CarouselSlides.FileBrowser);
+												setFileBrowserMode("thumbnail");
+											}}
+										>
+											Browse
+										</Button>
+									</div>
+									<FieldDescription>
+										Path to the thumbnail image for this project.
+									</FieldDescription>
+								</Field>
 							</FieldGroup>
 						</div>
 					</CarouselItem>
 
 					<CarouselItem>
 						<FileBrowser
-							extensions={[".yaml", ".yml"]}
+							extensions={
+								fileBrowserMode === "source" ? noriExtensions : imageExtensions
+							}
 							onSelect={(path) => {
 								onChange({
 									...values,
 									configuration: {
 										...values.configuration,
-										sourceFilePath: path
+										[fileBrowserMode === "source"
+											? "sourceFilePath"
+											: "thumbnailPath"]: path
 									}
 								});
 								carousel.goToIndex(CarouselSlides.ProjectDetails);

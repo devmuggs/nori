@@ -2,6 +2,7 @@ export type ProjectConfiguration = {
 	sourceFilePath: string;
 	outputFilePath: string;
 	options: Record<string, unknown>;
+	thumbnailPath?: string;
 };
 
 export type Project = {

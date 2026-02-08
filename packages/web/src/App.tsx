@@ -4,6 +4,7 @@ import { AppSidebar } from "./components/app-sidebar";
 import { ThemeProvider } from "./components/theme/theme-provider";
 import { SidebarProvider, SidebarTrigger } from "./components/ui/sidebar";
 import { TooltipProvider } from "./components/ui/tooltip";
+import { ProjectDetails } from "./components/workspace/projects/project-details";
 
 const queryClient = new QueryClient();
 
@@ -17,7 +18,9 @@ function App() {
 							<AppSidebar />
 							<main className="flex grow">
 								<SidebarTrigger />
-								<div className="grow p-6"></div>
+								<div className="grow p-6">
+									<ProjectDetails />
+								</div>
 							</main>
 						</SidebarProvider>
 					</TooltipProvider>
