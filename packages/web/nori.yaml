@@ -1,0 +1,37 @@
+meta:
+    preferredLocale: en-GB
+    author: tristan
+    project:
+        name: cli
+        description: A Nori project
+    version: 1.0.0
+collections:
+    root:
+        lets-get-started:
+            description:
+                en-GB: Displayed on first step of onboarding wizard.
+                ja-JP: オンボーディングウィザードの最初のステップに表示されます。
+            params:
+                topic:
+                    type: string
+                    description:
+                        en-GB: The topic to get started with.
+                        ja-JP: 始めるトピック。
+            locales:
+                en-GB: Let's get started with {{topic}}.
+                ja-JP: さあ、{{topic}}を始めましょう！
+    client:
+        greeting:
+            description:
+                en-GB: A friendly greeting message.
+                ja-JP: 親しみやすい挨拶メッセージ。
+            locales:
+                en-GB: Hello!
+                ja-JP: こんにちは！
+        farewell:
+            description:
+                en-GB: A friendly farewell message.
+                ja-JP: 親しみやすい別れのメッセージ。
+            locales:
+                en-GB: Goodbye!
+                ja-JP: さようなら！

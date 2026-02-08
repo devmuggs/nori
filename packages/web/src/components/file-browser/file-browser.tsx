@@ -1,0 +1,161 @@
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import clsx from "clsx";
+import { ChevronLeft } from "lucide-react";
+import { useState, type FC } from "react";
+import { Button } from "../ui/button";
+import { Field, FieldGroup, FieldLabel } from "../ui/field";
+import { Input } from "../ui/input";
+import { Switch } from "../ui/switch";
+
+export type FileSystemResponse = {
+	dir: string;
+	children: {
+		name: string;
+		isDirectory: boolean;
+	}[];
+};
+
+const requestFileSystem = async (options: {
+	path: string;
+	showHidden: boolean;
+	extensions?: string[];
+}): Promise<FileSystemResponse | null> => {
+	try {
+		const url = new URL("http://localhost:3080/file-system");
+		if (options.path) url.searchParams.append("q", options.path);
+		if (options.extensions && options.extensions.length > 0) {
+			url.searchParams.append("extensions", options.extensions.join(","));
+		}
+
+		url.searchParams.append("showHidden", options.showHidden ? "true" : "false");
+
+		const request = await axios.get(url.toString());
+		console.debug(`Selected directory response:`, request.data);
+		console.debug("Selected directory:", JSON.stringify(request.data.data));
+		return request.data.data as FileSystemResponse;
+	} catch (error) {
+		console.error("Error selecting directory:", error);
+		return null;
+	}
+};
+const pathToStack = (path: string): string[] => {
+	const segments = path.split("/").filter((segment) => segment.length > 0);
+	const stack: string[] = [];
+	for (const segment of segments) {
+		if (segment === ".") continue;
+		if (segment === "..") {
+			stack.pop();
+		} else {
+			stack.push(segment);
+		}
+	}
+	return stack;
+};
+
+const Preview: FC<{
+	path: string;
+	showHidden: boolean;
+	onClick: (node: { name: string; isDirectory: boolean }) => void;
+	extensions?: string[];
+}> = ({ path, showHidden, onClick, extensions }) => {
+	const { isLoading, error, data } = useQuery({
+		queryKey: ["file-system", path, showHidden, extensions],
+		queryFn: () => requestFileSystem({ path, showHidden, extensions })
+	});
+
+	if (isLoading) return <div>Loading...</div>;
+	if (error) return <div>Error loading file system.</div>;
+
+	const parentDirectory = pathToStack(data?.dir || "")
+		.slice(0, -1)
+		.join("/");
+
+	return (
+		<div className=" border p-4 rounded-md">
+			<div className="flex gap-2 w-full items-center mb-4">
+				<Button
+					type="button"
+					variant="outline"
+					onClick={() => onClick({ name: parentDirectory, isDirectory: true })}
+				>
+					<ChevronLeft size={16} />
+				</Button>
+				<Input className="rounded-md outline p-2 w-full" value={data?.dir} readOnly />
+			</div>
+			<ul
+				className={clsx(
+					"[&>li]:cursor-pointer [&>li]:p-2 [&>li]:hover:bg-accent-foreground/20 [&>li]:rounded-md",
+					"ml-4 flex flex-col gap-2 my-4 [&>li]:odd:bg-accent/50 [&>li]:even:bg-transparent p-2 border rounded-md max-h-96 overflow-y-auto"
+				)}
+			>
+				{data?.children.map((child) => (
+					<li
+						key={child.name}
+						onClick={() => {
+							onClick({
+								name: `${data?.dir}/${child.name}`,
+								isDirectory: child.isDirectory
+							});
+						}}
+					>
+						{child.name}
+						{child.isDirectory ? "/" : ""}
+					</li>
+				))}
+			</ul>
+		</div>
+	);
+};
+
+export const FileBrowser: FC<{ extensions?: string[]; onSelect: (path: string) => void }> = ({
+	extensions,
+	onSelect
+}) => {
+	const [pathStack, setPathStack] = useState<string[]>([]);
+	const [settings, setSettings] = useState<{ showHiddenFiles: boolean }>({
+		showHiddenFiles: false
+	});
+
+	const currentPath = pathStack[pathStack.length - 1] || "";
+
+	const addPath = (path: string) => {
+		const newPath = pathToStack(path).join("/");
+		setPathStack((prev) => [...prev, newPath]);
+	};
+
+	const handleClick = (node: { name: string; isDirectory: boolean }) => {
+		if (node.isDirectory) {
+			addPath(node.name);
+		} else {
+			onSelect(node.name);
+		}
+	};
+
+	return (
+		<div>
+			<h1 className="text-2xl font-bold mb-4">File Browser</h1>
+			<div className="mb-4">
+				<FieldGroup>
+					<Field orientation="horizontal">
+						<Switch
+							id="show-hidden-files"
+							checked={settings.showHiddenFiles}
+							onCheckedChange={(checked) =>
+								setSettings({ ...settings, showHiddenFiles: checked ?? false })
+							}
+						/>
+						<FieldLabel htmlFor="show-hidden-files">Show Hidden Files</FieldLabel>
+					</Field>
+				</FieldGroup>
+			</div>
+
+			<Preview
+				path={currentPath}
+				showHidden={settings.showHiddenFiles}
+				onClick={handleClick}
+				extensions={extensions}
+			/>
+		</div>
+	);
+};
