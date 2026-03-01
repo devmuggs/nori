@@ -12,18 +12,27 @@
 	"license": "ISC",
 	"type": "module",
 	"devDependencies": {
+		"@types/cookie-parser": "^1.4.10",
 		"@types/cors": "^2.8.19",
 		"@types/express": "^5.0.6",
+		"@types/pg": "^8.16.0",
 		"@types/ws": "^8.18.1",
+		"prisma": "^7.4.1",
 		"tsx": "^4.21.0",
 		"typescript": "^5.9.3"
 	},
 	"dependencies": {
 		"@nori/core": "workspace:^",
+		"@paralleldrive/cuid2": "^3.3.0",
+		"@prisma/adapter-pg": "^7.4.1",
+		"@prisma/client": "^7.4.1",
+		"argon2": "^0.44.0",
 		"consola": "^3.4.2",
+		"cookie-parser": "^1.4.7",
 		"cors": "^2.8.6",
 		"dotenv": "^17.2.4",
 		"express": "^5.2.1",
+		"pg": "^8.19.0",
 		"ws": "^8.19.0",
 		"zod": "^4.3.6"
 	}

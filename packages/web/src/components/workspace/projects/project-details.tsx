@@ -2,7 +2,6 @@ import { useFileWatcher } from "@/hooks/use-file-watcher";
 import {
 	codeGeneratorFactory,
 	Enum,
-	NoriSDK,
 	NoriYamlSchema,
 	SupportedCodeGenerator,
 	SupportedCodeGeneratorMeta,
@@ -117,11 +116,11 @@ export const WatchedFilePreview: FC<{
 			setError(null);
 
 			try {
-				const fileBlob = await NoriSDK.fileSystem.readFile(path);
-				const text = await fileBlob.text();
-				setFileContent(text);
-				onLoad?.(text);
-				setBlobUrl(URL.createObjectURL(fileBlob));
+				// const fileBlob = await NoriSDK.fileSystem.readFile(path);
+				// const text = await fileBlob.text();
+				// setFileContent(text);
+				// onLoad?.(text);
+				// setBlobUrl(URL.createObjectURL(fileBlob));
 			} catch (err) {
 				setError(err as Error);
 			} finally {

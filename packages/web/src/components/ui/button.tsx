@@ -57,7 +57,7 @@ function Button({
 				buttonVariants({ variant, size, className }),
 				props.disabled ? "pointer-events-none" : "cursor-pointer"
 			)}
-			data-type={props.type ?? "button"}
+			type={props.type ?? "button"}
 			{...props}
 		/>
 	);

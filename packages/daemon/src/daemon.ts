@@ -1,15 +1,17 @@
 import { createConsola, LogLevels } from "consola";
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 
-import { NoriSDK } from "@nori/core";
 import type { FileSystemResponse } from "@nori/core/sdk/file-system.js";
+import NoriSDK from "@nori/core/sdk/index.js";
 import fs from "fs";
 import { readdir } from "fs/promises";
 import { createServer } from "http";
 import { WebSocketServer } from "ws";
 import { platform, PlatformMeta } from "./core/platform.js";
+import { useAuthRouter } from "./features/authentication/authentcation-router.js";
 
 dotenv.config();
 
@@ -23,87 +25,30 @@ const wss = new WebSocketServer({ server });
 
 daemon.use(express.json());
 daemon.use(express.urlencoded({ extended: true }));
-daemon.use(
-	cors({
-		origin: "*",
-		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-		allowedHeaders: ["Content-Type", "Authorization"]
-	})
-);
-
 daemon.use((req, res, next) => {
 	logger.debug(`[${req.method}] ${req.url}`);
 	next();
 });
+daemon.use(
+	cors({
+		origin: (origin, callback) => {
+			// Allow all origins or restrict to specific ones
+			logger.debug(`CORS origin check: ${origin}`);
+			callback(null, true);
+		},
+		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+		allowedHeaders: ["Content-Type", "Authorization"],
+		credentials: true // Allow cookies and credentials
+	})
+);
+
+daemon.use(cookieParser());
 
 daemon.get("/health", (req, res) => {
 	res.status(200).send("OK");
 });
 
 export const DEFAULT_PATH = process.env.DEFAULT_PATH || (platform === "windows" ? "C:/" : "/home");
-
-daemon.get("/file-system/list-directory", async (req, res) => {
-	const parse = NoriSDK.fileSystem.schemas.listDirectory.query.safeParse(req.query);
-
-	if (!parse.success) {
-		logger.warn("Invalid file system query:", parse.error.format());
-		return res.status(400).json({ error: "Invalid query parameters" });
-	}
-
-	const { q, "show-hidden": showHidden, "allowed-extensions": extensions = [] } = parse.data;
-
-	const stack = NoriSDK.fileSystem.helpers.pathStringToStack(q || DEFAULT_PATH);
-	const path = `/${stack.join("/")}`;
-
-	const data: FileSystemResponse = { dir: path, children: [] };
-	const extensionSet = new Set(extensions);
-
-	try {
-		const nodes = await readdir(path, { withFileTypes: true });
-
-		for (const node of nodes) {
-			const { name } = node;
-			const isHidden = name.startsWith(".");
-			const isDirectory = node.isDirectory();
-			const extension = name.split(".").pop();
-			const isAllowedExtension = !extension || extensionSet.has(`.${extension}`);
-
-			if (!showHidden && isHidden) continue;
-			if (!isDirectory && !isAllowedExtension) continue;
-
-			data.children.push({
-				name,
-				isDirectory
-			});
-		}
-
-		data.children.sort((a, b) => {
-			if (a.isDirectory && !b.isDirectory) return -1;
-			if (!a.isDirectory && b.isDirectory) return 1;
-			return a.name.localeCompare(b.name);
-		});
-
-		res.status(200).json(data);
-	} catch (error) {
-		logger.error(`Error reading directory: ${path}`, error);
-		res.status(500).send("Internal Server Error");
-	}
-});
-
-daemon.get("/file-system/read-file", async (req, res) => {
-	const filePath = req.query.path as string;
-	if (!filePath) {
-		return res.status(400).json({ error: "Missing 'path' query parameter" });
-	}
-
-	try {
-		const blob = await fs.promises.readFile(filePath);
-		res.status(200).send(blob);
-	} catch (error) {
-		logger.error(`Error reading file: ${filePath}`, error);
-		res.status(500).send("Internal Server Error");
-	}
-});
 
 const fileWatchers = new Map<any, Map<string, fs.FSWatcher>>();
 
@@ -192,6 +137,8 @@ wss.on("connection", (ws) => {
 		logger.error("WebSocket error:", error);
 	});
 });
+
+useAuthRouter(daemon);
 
 const PORT = process.env.PORT || 3080; // ... because I have an rtx 3080
 server.listen(PORT, () => {

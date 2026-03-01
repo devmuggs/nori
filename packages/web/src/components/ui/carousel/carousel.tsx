@@ -1,8 +1,9 @@
-import React, { useMemo } from "react";
+import { animate, AnimatePresence, motion, useMotionValue } from "motion/react";
+import React, { useEffect, useMemo, useRef } from "react";
 import type { UseCarouselReturn } from "./use-carousel";
 
 export const CarouselItem: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-	return <div className="w-full flex-shrink-0 px-4">{children}</div>;
+	return <div className="w-full px-4">{children}</div>;
 };
 
 type CarouselContentProps = {
@@ -11,12 +12,40 @@ type CarouselContentProps = {
 	carouselHook: UseCarouselReturn;
 };
 
+const SLIDE_OFFSET = 60;
+
+const slideVariants = {
+	enter: (direction: number) => ({ opacity: 0, x: direction * SLIDE_OFFSET }),
+	center: { opacity: 1, x: 0 },
+	exit: (direction: number) => ({ opacity: 0, x: direction * -SLIDE_OFFSET })
+};
+
 export const CarouselContent: React.FC<CarouselContentProps> = ({
 	children,
 	debug = false,
 	carouselHook
 }) => {
-	const currentIndex = carouselHook.currentIndex;
+	const { currentIndex, direction } = carouselHook;
+	const prevIndexRef = useRef(currentIndex);
+	const resolvedDirection = direction ?? (currentIndex > prevIndexRef.current ? 1 : -1);
+
+	const targetHeight = useMotionValue(0);
+	const contentRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		const updateHeight = () => {
+			if (contentRef.current) {
+				const newHeight = contentRef.current.offsetHeight;
+				animate(targetHeight, newHeight, { duration: 0.3, ease: "easeInOut" });
+			}
+		};
+
+		updateHeight();
+	}, [currentIndex, children, targetHeight]);
+
+	useEffect(() => {
+		prevIndexRef.current = currentIndex;
+	}, [currentIndex]);
 
 	const { items, controls } = useMemo(() => {
 		const allChildren = React.Children.toArray(children);
@@ -33,27 +62,18 @@ export const CarouselContent: React.FC<CarouselContentProps> = ({
 	}, [children]);
 
 	const totalItems = items.length;
-	const translateXPercentage = -currentIndex * 100;
-
-	const handlePrevious = () => {
-		carouselHook.goToPrevious();
-	};
-
-	const handleNext = () => {
-		carouselHook.goToNext();
-	};
+	const currentItem = items[currentIndex];
 
 	const controlsWithHandlers = React.Children.map(controls, (child) => {
 		if (!React.isValidElement(child)) return child;
-
 		if (child.type === CarouselPrevious) {
 			return React.cloneElement(child as React.ReactElement<{ onClick?: () => void }>, {
-				onClick: handlePrevious
+				onClick: carouselHook.goToPrevious
 			});
 		}
 		if (child.type === CarouselNext) {
 			return React.cloneElement(child as React.ReactElement<{ onClick?: () => void }>, {
-				onClick: handleNext
+				onClick: carouselHook.goToNext
 			});
 		}
 		return child;
@@ -63,18 +83,31 @@ export const CarouselContent: React.FC<CarouselContentProps> = ({
 		<>
 			<div className="relative overflow-hidden">
 				{debug && (
-					<div className="absolute top-0 left-0 bg-black text-white p-1 text-xs z-10">
+					<div className="absolute top-0 left-0 z-10 bg-black p-1 text-xs text-white">
 						{currentIndex + 1} / {totalItems}
 					</div>
 				)}
-				<div
-					className="flex transition-transform duration-300 ease-in-out"
-					style={{ transform: `translateX(${translateXPercentage}%)` }}
+				<motion.div
+					style={{ height: targetHeight }}
+					transition={{ duration: 0.3, ease: "easeInOut" }}
+					className="relative w-full"
 				>
-					{items}
-				</div>
+					<AnimatePresence mode="wait" initial={false} custom={resolvedDirection}>
+						<motion.div
+							key={currentIndex}
+							custom={resolvedDirection}
+							variants={slideVariants}
+							initial="enter"
+							animate="center"
+							exit="exit"
+							transition={{ duration: 0.3, ease: "easeInOut" }}
+						>
+							<div ref={contentRef}>{currentItem}</div>
+						</motion.div>
+					</AnimatePresence>
+				</motion.div>
 			</div>
-			<div className="flex justify-between mt-4 gap-2">{controlsWithHandlers}</div>
+			<div className="mt-4 flex justify-between gap-2">{controlsWithHandlers}</div>
 		</>
 	);
 };

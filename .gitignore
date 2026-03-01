@@ -4,6 +4,7 @@
 
 # Ignore node_modules folders
 **/node_modules
+.pnpm-store
 
 # OS generated files
 .DS_Store

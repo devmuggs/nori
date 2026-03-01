@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-
-type Theme = "dark" | "light" | "system";
+import { Theme } from "./theme-enum";
 
 type ThemeProviderProps = {
 	children: React.ReactNode;

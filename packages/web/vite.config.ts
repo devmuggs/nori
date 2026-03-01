@@ -9,9 +9,13 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			"@": path.resolve(__dirname, "./src")
-		}
+		},
+		dedupe: ["react", "react-dom"]
 	},
 	optimizeDeps: {
 		include: ["zustand", "immer", "shiki"]
+	},
+	server: {
+		allowedHosts: ["nori.muggridge.dev"]
 	}
 });
