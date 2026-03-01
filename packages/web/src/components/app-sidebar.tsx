@@ -21,6 +21,7 @@ import {
 	ContextMenuTrigger
 } from "@/components/ui/context-menu";
 import { ConnectionStatus, noriSdk, useDaemon } from "@/lib/daemon-service";
+import Authentication from "@nori/core/sdk/authentication";
 import clsx from "clsx";
 import { useState } from "react";
 import { Theme, ThemeConfig } from "./theme/theme-enum";
@@ -78,13 +79,66 @@ const DeleteContextMenuItem = ({ ...props }: React.ComponentProps<typeof Context
 	);
 };
 
+export const avatarToUrl = (avatar: Authentication.Schemas.UserJson["avatar"]) => {
+	if (!avatar || !avatar.url) return null;
+	return `${noriSdk.dependencies.noriApiUrl}/file-uploads/download?key=${avatar.url}`;
+};
+
+export const isImage = (url: string) => {
+	return url
+		.split(".")
+		.pop()
+		?.toLowerCase()
+		.match(/(jpg|jpeg|png|gif|webp)/);
+};
+
+export const isVideo = (url: string) => {
+	return url
+		.split(".")
+		.pop()
+		?.toLowerCase()
+		.match(/(mp4|webm|ogg)/);
+};
+
+const AvatarMedia = () => {
+	const user = useUser();
+	if (!user) return null;
+	if (!user.avatar || !user.avatar.url) {
+		return <User className="size-8" />;
+	}
+
+	const url = user.avatar?.url;
+	if (url && isImage(url)) {
+		return (
+			<img
+				src={`${noriSdk.dependencies.noriApiUrl}/file-uploads/download?key=${url}`}
+				alt="User Avatar"
+				className="size-8 rounded-full object-cover"
+			/>
+		);
+	} else if (url && isVideo(url)) {
+		return (
+			<video
+				src={`${noriSdk.dependencies.noriApiUrl}/file-uploads/download?key=${url}`}
+				className="size-8 rounded-full object-cover"
+				autoPlay
+				muted
+				loop
+			/>
+		);
+	} else {
+		return <User className="size-8" />;
+	}
+};
+
 const Avatar = () => {
 	const user = useUser();
 	if (!user) return null;
+
 	return (
 		<div className="flex gap-2 items-center">
-			<User className="size-8" />
-
+			{/* <User className="size-8" /> */}
+			<AvatarMedia />
 			<div className="flex flex-col leading-tight text-sm text-left">
 				<span className="truncate font-medium">
 					{user.displayName ?? user.email.split("@")[0]}

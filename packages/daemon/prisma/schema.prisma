@@ -16,21 +16,65 @@ datasource db {
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
-
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
 
   revisions UserRevision[]
+  federations UserFederation[]
+  objects Object[]
 }
-
 model UserRevision {
   id        String   @id @default(cuid())
-  userId    String
+  userId    String @map("user_id")
 
   email     String   
-  displayName      String?
-  password  String
+  displayName String? @map("display_name")
+  avatarObjectId String? @map("avatar_object_id")
 
-  createdAt DateTime @default(now())
-  
+  password String
+
+  createdAt DateTime @default(now()) @map("created_at")
+   
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  avatarObject Object? @relation("avatarObject", fields: [avatarObjectId], references: [id], onDelete: SetNull)
 }
+
+model IdentityProvider {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  federations UserFederation[]
+}
+
+// Allows users to authenticate with external providers (e.g. Google, GitHub) without storing their password in our database. Each record represents a unique combination of provider and providerId for a user.
+model UserFederation {
+  id        String   @id @default(cuid())
+  
+  externalId String @map("external_id") // the unique identifier from the external provider (e.g. Google user ID)
+
+  userId    String @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  providerId String @map("provider_id")
+  provider  IdentityProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, externalId]) // ensures a user can only have one federation per provider with a unique external ID
+  @@index([userId])
+}
+
+model Object {
+  id        String   @id @default(cuid())
+
+  size      Int    // size of the object in bytes
+  mimeType  String @map("mime_type") // MIME type of the object (e.g. "image/png")
+  url       String
+  
+  createdAt DateTime @default(now()) @map("created_at")
+
+  uploadedBy String @map("uploaded_by")
+  user      User     @relation(fields: [uploadedBy], references: [id], onDelete: Cascade)
+
+  userRevisions UserRevision[] @relation("avatarObject")
+  @@index([uploadedBy])
+}
+

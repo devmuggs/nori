@@ -3,10 +3,11 @@ import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { Authentication } from "@nori/core";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { avatarToUrl } from "../app-sidebar";
 import { Button } from "../ui/button";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
-import { EmailInput } from "./fields";
+import { EmailInput, FileInput } from "./fields";
 
 export default function UserEditForm({
 	user,
@@ -34,6 +35,19 @@ export default function UserEditForm({
 	return (
 		<form className="flex items-center gap-2" onSubmit={handleSubmit(onSubmit)}>
 			<FieldGroup>
+				<Field>
+					<FieldLabel>Profile Picture</FieldLabel>
+					<FileInput
+						name="profilePicture"
+						control={control}
+						currentFileUrl={user?.avatar?.url && avatarToUrl(user.avatar)}
+					/>
+					<FieldDescription>
+						Upload a profile picture to personalize your account. Images and Videos are
+						both supported. Max file size is 5MB.
+					</FieldDescription>
+				</Field>
+
 				<Controller
 					name={"email"}
 					control={control}

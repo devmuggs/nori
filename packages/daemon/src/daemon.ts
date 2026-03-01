@@ -4,14 +4,12 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 
-import type { FileSystemResponse } from "@nori/core/sdk/file-system.js";
-import NoriSDK from "@nori/core/sdk/index.js";
 import fs from "fs";
-import { readdir } from "fs/promises";
 import { createServer } from "http";
 import { WebSocketServer } from "ws";
 import { platform, PlatformMeta } from "./core/platform.js";
 import { useAuthRouter } from "./features/authentication/authentcation-router.js";
+import { useFileUploadRouter } from "./features/file-uploads/file-upload-router.js";
 
 dotenv.config();
 
@@ -32,13 +30,18 @@ daemon.use((req, res, next) => {
 daemon.use(
 	cors({
 		origin: (origin, callback) => {
-			// Allow all origins or restrict to specific ones
-			logger.debug(`CORS origin check: ${origin}`);
-			callback(null, true);
+			// allow requests with no origin (e.g. direct <img>/<video> src, server-to-server)
+			if (!origin) return callback(null, true);
+
+			// nori web is hosted on cloudflare tunnel at nori.muggridge.dev
+			if (origin === "http://localhost:5174" || origin === "https://nori.muggridge.dev") {
+				return callback(null, true);
+			}
+			callback(new Error("Not allowed by CORS"));
 		},
 		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 		allowedHeaders: ["Content-Type", "Authorization"],
-		credentials: true // Allow cookies and credentials
+		credentials: true // Allow cookies and credentials,
 	})
 );
 
@@ -139,6 +142,36 @@ wss.on("connection", (ws) => {
 });
 
 useAuthRouter(daemon);
+useFileUploadRouter(daemon);
+
+import http from "http";
+// setup a proxy for the object storage so that clients can use the pre-signed URLs without needing to know the internal hostname of the minio server or worry about CORS issues when uploading directly to the minio server from the client
+daemon.use("/object-storage", (req, res) => {
+	const { method, url, headers } = req;
+	const targetUrl = `http://minio:9000${url}`;
+
+	logger.debug(`Proxying request to object storage: ${method} ${targetUrl}`);
+
+	const proxyReq = http.request(
+		targetUrl,
+		{ method, headers: { ...headers, host: "minio:9000" } },
+		(proxyRes) => {
+			res.writeHead(proxyRes.statusCode || 500, proxyRes.headers);
+			proxyRes.pipe(res, { end: true });
+		}
+	);
+
+	proxyReq.on("error", (error) => {
+		logger.error("Error proxying request to object storage:", error);
+		res.status(500).json({ message: "Error proxying request to object storage" });
+	});
+
+	if (method === "POST" || method === "PUT") {
+		req.pipe(proxyReq, { end: true });
+	} else {
+		proxyReq.end();
+	}
+});
 
 const PORT = process.env.PORT || 3080; // ... because I have an rtx 3080
 server.listen(PORT, () => {

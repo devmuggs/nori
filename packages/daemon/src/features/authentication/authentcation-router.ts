@@ -18,7 +18,7 @@ const appendAuthCookie = (res: Response, token: string) => {
 	});
 };
 
-const sessions = new Map<string, UserEntity>(); // In-memory session store (token -> userId)
+export const sessions = new Map<string, UserEntity>(); // In-memory session store (token -> userId)
 
 authRouter.post("/register", async (req: Request, res: Response) => {
 	const { email, password, displayName } = Authentication.Schemas.userCreate.parse(req.body);
@@ -95,14 +95,15 @@ authRouter.post("/login", async (req: Request, res: Response) => {
 	try {
 		const { email, password } = Authentication.Schemas.userLogin.parse(req.body);
 
-		const user = await prisma.$transaction(async (prisma) => {
+		const { user, avatar } = await prisma.$transaction(async (prisma) => {
 			const repo = new UserRepository(prisma);
 			const user = await repo.findByEmail(email);
+			const avatar = user ? await repo.fetchAvatarObject(user.id) : null;
 
 			const isValidPassword = !!user && (await repo.verifyPassword(user.id, password));
 			if (!isValidPassword) throw new HttError(401, "Invalid email or password");
 
-			return user;
+			return { user, avatar };
 		});
 
 		appendAuthCookie(res, user.id);
@@ -113,7 +114,8 @@ authRouter.post("/login", async (req: Request, res: Response) => {
 			id: user.id,
 			email: user.email,
 			displayName: user.displayName || undefined,
-			createdAt: user.createdAt.toISOString()
+			createdAt: user.createdAt.toISOString(),
+			avatar: avatar ? { id: avatar.id, url: avatar.url } : undefined
 		};
 
 		res.status(200).json(json);

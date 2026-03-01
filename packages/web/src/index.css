@@ -7,6 +7,13 @@
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 } */
 
+/* set all to border-box */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

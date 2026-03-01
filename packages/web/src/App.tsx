@@ -1,5 +1,4 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { toast } from "sonner";
 import "./App.css";
 import { AppSidebar } from "./components/app-sidebar";
 import { ThemeProvider } from "./components/theme/theme-provider";

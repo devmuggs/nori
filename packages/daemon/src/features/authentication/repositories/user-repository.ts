@@ -172,6 +172,14 @@ export default class UserRepository {
 		);
 	}
 
+	async fetchAvatarObject(userId: string) {
+		const userRevision = await this.fetchLatestRevision({ userId });
+		return this.db.object.findFirst({
+			where: { userRevisions: { some: { id: userRevision?.id } } },
+			orderBy: { createdAt: "desc" }
+		});
+	}
+
 	private fetchLatestRevision = async (identifier: { userId: string } | { email: string }) =>
 		this.db.userRevision.findFirst({
 			where: identifier,

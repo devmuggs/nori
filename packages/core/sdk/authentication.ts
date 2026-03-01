@@ -10,7 +10,8 @@ namespace Authentication {
 			id: z.string(), //cuid2
 			email: z.email(),
 			displayName: z.string().optional(),
-			createdAt: z.iso.datetime()
+			createdAt: z.iso.datetime(),
+			avatar: z.any().optional()
 		});
 
 		export type UserJsonListItem = z.infer<typeof userJsonListItemSchema>;

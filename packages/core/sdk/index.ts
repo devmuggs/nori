@@ -3,6 +3,7 @@ import { Enum, EnumValue } from "..";
 import { DeploymentMode } from "../deployment-mode";
 
 import _Authentication from "./authentication";
+import _FileUploads from "./file-uploads";
 import _Health from "./health";
 
 export namespace NoriSDK {
@@ -40,6 +41,7 @@ export namespace NoriSDK {
 	export namespace Modules {
 		export import Authentication = _Authentication;
 		export import Health = _Health;
+		export import FileUploads = _FileUploads;
 	}
 
 	export class Client {
@@ -129,6 +131,7 @@ export namespace NoriSDK {
 
 		readonly auth = _Authentication.create(this);
 		readonly health = _Health.create(this);
+		readonly files = _FileUploads.create(this);
 	}
 }
 
